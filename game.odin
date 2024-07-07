@@ -20,6 +20,12 @@ Sprite_Sheet :: struct {
     sprite_columns: i32,
 }
 
+Animation :: struct {
+    sprite_sheet: Sprite_Sheet,
+    frames_per_second: i32,
+    frames: []i32,
+}
+
 game_logic :: proc(using gs: ^Game_State) {
     if rl.IsKeyDown(rl.KeyboardKey.UP) {
         character.y -= character_speed
@@ -54,6 +60,11 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: i32, dest: rl
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
 }
 
+render_animation :: proc(animation: ^Animation, dest: rl.Rectangle) {
+    frameIndex := i32(rl.GetTime() * f64(animation.frames_per_second)) % i32(len(animation.frames))
+    render_sprite(&(animation.sprite_sheet), animation.frames[frameIndex], dest)
+}
+
 main :: proc() {
     gs := Game_State {
         window_size = {1280, 720},
@@ -86,6 +97,12 @@ main :: proc() {
         sprite_columns = 12,
     }
 
+    left_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {(12 * 3), (12 * 3) + 1, (12 * 3) + 2},
+        frames_per_second = 5,
+    }
+
     food_to_render : i32 = 0
     sprite_to_render : i32 = 0
     timer : i32 = 0
@@ -109,7 +126,7 @@ main :: proc() {
         rl.ClearBackground(rl.WHITE)
         //render_sprite(&char_sheet, sprite_to_render, character)
         render_sprite(&food_sheet, food_to_render, food)
-        render_sprite(&cart_sheet, sprite_to_render + (3 * 12), character)
+        render_animation(&left_cart, character)
         rl.EndDrawing()
     }
 }
