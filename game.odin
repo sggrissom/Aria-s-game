@@ -8,9 +8,14 @@ import rl "vendor:raylib"
 
 Game_State :: struct {
     window_size: rl.Vector2,
-    character: rl.Rectangle,
+    character: Character,
     food: rl.Rectangle,
-    character_speed: f32,
+}
+
+Character :: struct {
+    position: rl.Rectangle,
+    speed: f32,
+    direction: Direction,
 }
 
 Sprite_Sheet :: struct {
@@ -26,21 +31,27 @@ Animation :: struct {
     frames: []i32,
 }
 
+Direction :: enum {UP, DOWN, LEFT, RIGHT}
+
 game_logic :: proc(using gs: ^Game_State) {
     if rl.IsKeyDown(rl.KeyboardKey.UP) {
-        character.y -= character_speed
+        character.position.y -= character.speed
+        character.direction = .UP
     }
     if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
-        character.y += character_speed
+        character.position.y += character.speed
+        character.direction = .DOWN
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
-        character.x -= character_speed
+        character.position.x -= character.speed
+        character.direction = .LEFT
     }
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
-        character.x += character_speed
+        character.position.x += character.speed
+        character.direction = .RIGHT
     }
-    character.x = linalg.clamp(character.x, 0, window_size.x - character.width)
-    character.y = linalg.clamp(character.y, 0, window_size.y - character.height)
+    character.position.x = linalg.clamp(character.position.x, 0, window_size.x - character.position.width)
+    character.position.y = linalg.clamp(character.position.y, 0, window_size.y - character.position.height)
 }
 
 render_game :: proc(using gs: ^Game_State) {
@@ -66,11 +77,14 @@ render_animation :: proc(animation: ^Animation, dest: rl.Rectangle) {
 }
 
 main :: proc() {
+    main_character := Character {
+        position = {width = 64, height = 64},
+        speed = 10,
+    }
     gs := Game_State {
         window_size = {1280, 720},
-        character = {width = 64, height = 64},
         food = {width = 50, height = 50, x = 50, y = 50},
-        character_speed = 10,
+        character = main_character,
     }
 
     using gs
@@ -102,6 +116,21 @@ main :: proc() {
         frames = {(12 * 3), (12 * 3) + 1, (12 * 3) + 2},
         frames_per_second = 5,
     }
+    right_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {(0 * 3), (0 * 3) + 1, (0 * 3) + 2},
+        frames_per_second = 5,
+    }
+    up_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {(10 * 4 * 3), (10 * 4 * 3) + 1, (10 * 4 * 3) + 2},
+        frames_per_second = 5,
+    }
+    down_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {(7 * 4 * 3), (7 * 4 * 3) + 1, (7 * 4 * 3) + 2},
+        frames_per_second = 5,
+    }
 
     food_to_render : i32 = 0
     sprite_to_render : i32 = 0
@@ -126,7 +155,19 @@ main :: proc() {
         rl.ClearBackground(rl.WHITE)
         //render_sprite(&char_sheet, sprite_to_render, character)
         render_sprite(&food_sheet, food_to_render, food)
-        render_animation(&left_cart, character)
+
+        if (character.direction == Direction.UP) {
+            render_animation(&up_cart, character.position)
+        }
+        if (character.direction == Direction.DOWN) {
+            render_animation(&down_cart, character.position)
+        }
+        if (character.direction == Direction.LEFT) {
+            render_animation(&left_cart, character.position)
+        }
+        if (character.direction == Direction.RIGHT) {
+            render_animation(&right_cart, character.position)
+        }
         rl.EndDrawing()
     }
 }
