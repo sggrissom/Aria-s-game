@@ -17,6 +17,7 @@ Character :: struct {
     speed: f32,
     direction: Direction,
     is_moving: bool,
+    is_empty: bool,
 }
 
 Sprite_Sheet :: struct {
@@ -56,6 +57,11 @@ game_logic :: proc(using gs: ^Game_State) {
         character.direction = .RIGHT
         is_moving = true
     }
+    if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
+        character.is_empty = false
+    } else {
+        character.is_empty = true
+    }
     character.position.x = linalg.clamp(character.position.x, 0, window_size.x - character.position.width)
     character.position.y = linalg.clamp(character.position.y, 0, window_size.y - character.position.height)
 
@@ -89,9 +95,10 @@ render_animation :: proc(animation: ^Animation, char: ^Character) {
 
 main :: proc() {
     main_character := Character {
-        position = {width = 64, height = 64},
-        speed = 10,
+        position = {width = 100, height = 100},
+        speed = 7,
         is_moving = false,
+        is_empty = true,
     }
     gs := Game_State {
         window_size = {1280, 720},
@@ -123,24 +130,44 @@ main :: proc() {
         sprite_columns = 3,
     }
 
-    left_cart := Animation {
+    empty_left_cart := Animation {
         sprite_sheet = cart_sheet,
         frames = {3, 4, 5},
         frames_per_second = 5,
     }
-    right_cart := Animation {
+    empty_right_cart := Animation {
         sprite_sheet = cart_sheet,
         frames = {6, 7, 8},
         frames_per_second = 5,
     }
-    up_cart := Animation {
+    empty_up_cart := Animation {
         sprite_sheet = cart_sheet,
         frames = {9, 10, 11},
         frames_per_second = 5,
     }
-    down_cart := Animation {
+    empty_down_cart := Animation {
         sprite_sheet = cart_sheet,
         frames = {0, 1, 2},
+        frames_per_second = 5,
+    }
+    full_left_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {3+12, 4+12, 5+12},
+        frames_per_second = 5,
+    }
+    full_right_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {6+12, 7+12, 8+12},
+        frames_per_second = 5,
+    }
+    full_up_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {9+12, 10+12, 11+12},
+        frames_per_second = 5,
+    }
+    full_down_cart := Animation {
+        sprite_sheet = cart_sheet,
+        frames = {0+12, 1+12, 2+12},
         frames_per_second = 5,
     }
 
@@ -162,18 +189,22 @@ main :: proc() {
         rl.ClearBackground(rl.WHITE)
         render_sprite(&food_sheet, food_to_render, food)
 
+        animation :^Animation
+
         if (character.direction == Direction.UP) {
-            render_animation(&up_cart, &character)
+            animation = character.is_empty ? &empty_up_cart : &full_up_cart
         }
         if (character.direction == Direction.DOWN) {
-            render_animation(&down_cart, &character)
+            animation = character.is_empty ? &empty_down_cart : &full_down_cart
         }
         if (character.direction == Direction.LEFT) {
-            render_animation(&left_cart, &character)
+            animation = character.is_empty ? &empty_left_cart : &full_left_cart
         }
         if (character.direction == Direction.RIGHT) {
-            render_animation(&right_cart, &character)
+            animation = character.is_empty ? &empty_right_cart : &full_right_cart
         }
+
+        render_animation(animation, &character)
         rl.DrawFPS(10,10)
         rl.EndDrawing()
     }
