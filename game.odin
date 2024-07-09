@@ -118,29 +118,29 @@ main :: proc() {
     }
     cart_sheet := Sprite_Sheet {
         texture = rl.LoadTexture("resources/CART.png"),
-        sheet_size = {768, 768},
-        sprite_rows = 12,
-        sprite_columns = 12,
+        sheet_size = {288, 768},
+        sprite_rows = 8,
+        sprite_columns = 3,
     }
 
     left_cart := Animation {
         sprite_sheet = cart_sheet,
-        frames = {(12 * 3), (12 * 3) + 1, (12 * 3) + 2},
+        frames = {3, 4, 5},
         frames_per_second = 5,
     }
     right_cart := Animation {
         sprite_sheet = cart_sheet,
-        frames = {(0 * 3), (0 * 3) + 1, (0 * 3) + 2},
+        frames = {6, 7, 8},
         frames_per_second = 5,
     }
     up_cart := Animation {
         sprite_sheet = cart_sheet,
-        frames = {(10 * 4 * 3), (10 * 4 * 3) + 1, (10 * 4 * 3) + 2},
+        frames = {9, 10, 11},
         frames_per_second = 5,
     }
     down_cart := Animation {
         sprite_sheet = cart_sheet,
-        frames = {(7 * 4 * 3), (7 * 4 * 3) + 1, (7 * 4 * 3) + 2},
+        frames = {0, 1, 2},
         frames_per_second = 5,
     }
 
