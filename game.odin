@@ -16,6 +16,7 @@ Character :: struct {
     position: rl.Rectangle,
     speed: f32,
     direction: Direction,
+    is_moving: bool,
 }
 
 Sprite_Sheet :: struct {
@@ -34,24 +35,31 @@ Animation :: struct {
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 
 game_logic :: proc(using gs: ^Game_State) {
+    is_moving := false
     if rl.IsKeyDown(rl.KeyboardKey.UP) {
         character.position.y -= character.speed
         character.direction = .UP
+        is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
         character.position.y += character.speed
         character.direction = .DOWN
+        is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
         character.position.x -= character.speed
         character.direction = .LEFT
+        is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
         character.position.x += character.speed
         character.direction = .RIGHT
+        is_moving = true
     }
     character.position.x = linalg.clamp(character.position.x, 0, window_size.x - character.position.width)
     character.position.y = linalg.clamp(character.position.y, 0, window_size.y - character.position.height)
+
+    character.is_moving = is_moving
 }
 
 render_game :: proc(using gs: ^Game_State) {
@@ -71,15 +79,19 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: i32, dest: rl
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
 }
 
-render_animation :: proc(animation: ^Animation, dest: rl.Rectangle) {
-    frameIndex := i32(rl.GetTime() * f64(animation.frames_per_second)) % i32(len(animation.frames))
-    render_sprite(&(animation.sprite_sheet), animation.frames[frameIndex], dest)
+render_animation :: proc(animation: ^Animation, char: ^Character) {
+    frameIndex : i32 = 0
+    if (char.is_moving) {
+        frameIndex = i32(rl.GetTime() * f64(animation.frames_per_second)) % i32(len(animation.frames))
+    }
+    render_sprite(&(animation.sprite_sheet), animation.frames[frameIndex], char.position)
 }
 
 main :: proc() {
     main_character := Character {
         position = {width = 64, height = 64},
         speed = 10,
+        is_moving = false,
     }
     gs := Game_State {
         window_size = {1280, 720},
@@ -133,18 +145,13 @@ main :: proc() {
     }
 
     food_to_render : i32 = 0
-    sprite_to_render : i32 = 0
     timer : i32 = 0
 
     for !rl.WindowShouldClose() {
         timer+=1
         if (timer % 20 == 0) {
-            sprite_to_render += 1
             food_to_render += 1
             timer = 0
-        }
-        if (sprite_to_render > (3) - 1) {
-            sprite_to_render = 0
         }
         if (food_to_render > (food_sheet.sprite_rows * food_sheet.sprite_columns) - 1) {
             food_to_render = 0
@@ -153,21 +160,21 @@ main :: proc() {
         game_logic(&gs)
         rl.BeginDrawing()
         rl.ClearBackground(rl.WHITE)
-        //render_sprite(&char_sheet, sprite_to_render, character)
         render_sprite(&food_sheet, food_to_render, food)
 
         if (character.direction == Direction.UP) {
-            render_animation(&up_cart, character.position)
+            render_animation(&up_cart, &character)
         }
         if (character.direction == Direction.DOWN) {
-            render_animation(&down_cart, character.position)
+            render_animation(&down_cart, &character)
         }
         if (character.direction == Direction.LEFT) {
-            render_animation(&left_cart, character.position)
+            render_animation(&left_cart, &character)
         }
         if (character.direction == Direction.RIGHT) {
-            render_animation(&right_cart, character.position)
+            render_animation(&right_cart, &character)
         }
+        rl.DrawFPS(10,10)
         rl.EndDrawing()
     }
 }
