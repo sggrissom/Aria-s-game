@@ -27,16 +27,18 @@ render_map :: proc(current_map: ^Map) {
     map_size := current_map.width * current_map.height
 
     for i :i32 = 0 ; i < map_size; i += 1{
-        tileWidth :: 35
-        dest : rl.Rectangle = { tileWidth * f32(i % current_map.width), tileWidth * f32(i / current_map.width), tileWidth, tileWidth };
-        render_sprite(&food_sheet, current_map.tiles[i], dest)
+        tileWidth :: 48
+        
+        if (current_map.tiles[i] > 0) {
+            dest : rl.Rectangle = { tileWidth * f32(i % current_map.width), tileWidth * f32(i / current_map.width), tileWidth, tileWidth };
+            render_sprite(&walls_sheet, current_map.tiles[i], dest)
+        }
     }
 }
 
 render_frame :: proc() {
     rl.BeginDrawing()
     rl.ClearBackground(rl.WHITE)
-    render_entity(&gs.food)
 
     animation :^Animation
 
@@ -55,6 +57,7 @@ render_frame :: proc() {
 
     render_map(&game_map)
     render_entity(&gs.cart.entity)
+    render_entity(&gs.food)
     rl.DrawFPS(10,10)
     rl.EndDrawing()
 

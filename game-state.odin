@@ -4,6 +4,8 @@ gs : Game_State
 
 food_sheet : Sprite_Sheet
 cart_sheet : Sprite_Sheet
+store_sheet : Sprite_Sheet
+walls_sheet : Sprite_Sheet
 
 empty_left_cart : Animation
 empty_right_cart : Animation

@@ -101,6 +101,18 @@ main :: proc() {
         sprite_rows = 51,
         sprite_columns = 2,
     }
+    store_sheet = Sprite_Sheet {
+        texture = rl.LoadTexture("resources/STORE.png"),
+        sheet_size = {48, 80},
+        sprite_rows = 2,
+        sprite_columns = 1,
+    }
+    walls_sheet = Sprite_Sheet {
+        texture = rl.LoadTexture("resources/WALLS-2.png"),
+        sheet_size = {384, 288},
+        sprite_rows = 6,
+        sprite_columns = 8,
+    }
     cart_sheet = Sprite_Sheet {
         texture = rl.LoadTexture("resources/CART.png"),
         sheet_size = {288, 768},
