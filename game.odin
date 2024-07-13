@@ -1,10 +1,47 @@
 package main
 
 import "core:fmt"
+import "core:os"
 import "core:math"
 import "core:math/linalg"
 import "core:math/rand"
+import "core:strings"
+import "core:strconv"
 import rl "vendor:raylib"
+
+food_sheet : Sprite_Sheet;
+
+read_map :: proc(filepath: string) -> Map {
+	data, ok := os.read_entire_file(filepath, context.allocator)
+    assert(ok, "error reading file")
+	defer delete(data, context.allocator)
+
+    file_contents := string(data)
+    file_tokens := strings.fields(file_contents)
+    map_width, _ := strconv.parse_int(file_tokens[0])
+    map_height, _ := strconv.parse_int(file_tokens[1])
+
+    numbers: [dynamic]i32 = {} 
+    numberSourceMap : [dynamic]^Sprite_Sheet = {}
+
+    tile_count :int = int(map_width * map_height)
+    for token in file_tokens[2:] {
+        val, ok := strconv.parse_int(token)
+        if (ok) {
+            append(&numbers, i32(val))
+        } else {
+            append(&numberSourceMap, &food_sheet)
+        }
+    }
+    
+    game_map: Map
+    game_map.width = i32(map_width)
+    game_map.height = i32(map_height)
+    game_map.tiles = numbers
+    game_map.tile_texture = numberSourceMap
+
+    return game_map
+}
 
 game_logic :: proc(using gs: ^Game_State) {
     is_moving := false
@@ -60,7 +97,7 @@ main :: proc() {
     rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
     rl.SetTargetFPS(60)
 
-    food_sheet := Sprite_Sheet {
+    food_sheet = Sprite_Sheet {
         texture = rl.LoadTexture("resources/FOOD.png"),
         sheet_size = {64, 1632},
         sprite_rows = 51,
@@ -72,6 +109,8 @@ main :: proc() {
         sprite_rows = 8,
         sprite_columns = 3,
     }
+
+    game_map := read_map("resources/world.map")
 
     gs.food.animation = &Animation {
         sprite_sheet = food_sheet,

@@ -34,4 +34,11 @@ Animation :: struct {
     frames: []i32,
 }
 
+Map :: struct {
+    width: i32,
+    height: i32,
+    tiles: [dynamic]i32,
+    tile_texture: [dynamic]^Sprite_Sheet,
+}
+
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
