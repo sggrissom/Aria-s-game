@@ -40,6 +40,8 @@ render_frame :: proc() {
     rl.BeginDrawing()
     rl.ClearBackground(rl.WHITE)
 
+    rl.BeginMode2D(gs.cam)
+
     animation :^Animation
 
     if (gs.cart.entity.direction == Direction.UP) {
@@ -59,6 +61,7 @@ render_frame :: proc() {
     render_entity(&gs.cart.entity)
     render_entity(&gs.food)
     rl.DrawFPS(10,10)
+    rl.EndMode2D()
     rl.EndDrawing()
 
 }

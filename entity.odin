@@ -6,6 +6,7 @@ Game_State :: struct {
     window_size: rl.Vector2,
     cart: Cart,
     food: Entity,
+    cam: rl.Camera2D,
 }
 
 Entity :: struct {

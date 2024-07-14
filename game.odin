@@ -72,6 +72,8 @@ game_logic :: proc() {
     gs.cart.entity.position.y = linalg.clamp(gs.cart.entity.position.y, 0, gs.window_size.y - gs.cart.entity.position.height)
 
     gs.cart.entity.is_animating = is_moving
+
+    gs.cam.target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2};
 }
 
 main :: proc() {
@@ -90,6 +92,12 @@ main :: proc() {
         },
         speed = 7,
         is_empty = true,
+    }
+    gs.cam = {
+        offset = { gs.window_size.x / 2, gs.window_size.y / 2},
+        target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2},
+        rotation = 0,
+        zoom = 1
     }
 
     rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
