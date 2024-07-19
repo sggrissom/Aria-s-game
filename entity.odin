@@ -25,21 +25,20 @@ Cart :: struct {
 Sprite_Sheet :: struct {
     texture: rl.Texture2D,
     sheet_size: rl.Vector2,
-    sprite_rows: i32,
-    sprite_columns: i32,
+    sprite_rows: int,
+    sprite_columns: int,
 }
 
 Animation :: struct {
-    sprite_sheet: Sprite_Sheet,
-    frames_per_second: i32,
-    frames: []i32,
+    sprite_sheet: ^Sprite_Sheet,
+    frames_per_second: int,
+    frames: [dynamic]int,
 }
 
 Map :: struct {
-    width: i32,
-    height: i32,
-    tiles: [dynamic]i32,
-    tile_texture: [dynamic]^Sprite_Sheet,
+    width: int,
+    height: int,
+    tiles: [dynamic]^Entity,
 }
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}

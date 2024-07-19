@@ -2,37 +2,35 @@ package main
 
 import rl "vendor:raylib"
 
-render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: i32, dest: rl.Rectangle)
+render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl.Rectangle)
 {
     sprite_width :f32 = sprite_sheet.sheet_size.x / f32(sprite_sheet.sprite_columns);
     sprite_height :f32 = sprite_sheet.sheet_size.y / f32(sprite_sheet.sprite_rows);
 
-    sprite_row : i32 = spriteToRender / sprite_sheet.sprite_columns
-    sprite_column : i32 = spriteToRender % sprite_sheet.sprite_columns
+    sprite_row : int = spriteToRender / sprite_sheet.sprite_columns
+    sprite_column : int = spriteToRender % sprite_sheet.sprite_columns
 
     // Source rectangle (part of the texture to use for drawing)
     sourceRec : rl.Rectangle = { sprite_width * f32(sprite_column), (sprite_height * f32(sprite_row)), sprite_width, sprite_height };
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
+    rl.DrawRectangleLinesEx(dest, 0.5, rl.RED)
 }
 
 render_entity :: proc(entity: ^Entity) {
-    frameIndex : i32 = 0
-    if (entity.is_animating) {
-        frameIndex = i32(rl.GetTime() * f64(entity.animation.frames_per_second)) % i32(len(entity.animation.frames))
+    if (entity.animation == nil) {
+        return
     }
-    render_sprite(&(entity.animation.sprite_sheet), entity.animation.frames[frameIndex], entity.position)
+    frameIndex := 0
+    if (entity.is_animating) {
+        frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
+    }
+    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
 }
 
-render_map :: proc(current_map: ^Map) {
-    map_size := current_map.width * current_map.height
-
-    for i :i32 = 0 ; i < map_size; i += 1{
-        tileWidth :: 48
-        
-        if (current_map.tiles[i] > 0) {
-            dest : rl.Rectangle = { tileWidth * f32(i % current_map.width), tileWidth * f32(i / current_map.width), tileWidth, tileWidth };
-            render_sprite(&walls_sheet, current_map.tiles[i], dest)
-        }
+render_map :: proc() {
+    for &tile in game_map.tiles {
+        assert(tile.animation.frames[0] >= 0)
+        render_entity(tile)
     }
 }
 
@@ -57,10 +55,10 @@ render_frame :: proc() {
         gs.cart.entity.animation = gs.cart.is_empty ? &empty_right_cart : &full_right_cart
     }
 
-    render_map(&game_map)
+    render_map()
     render_entity(&gs.cart.entity)
     render_entity(&gs.food)
-    rl.DrawFPS(10,10)
+    rl.DrawFPS(-30, -30)
     rl.EndMode2D()
     rl.EndDrawing()
 

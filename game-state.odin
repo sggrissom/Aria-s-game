@@ -16,4 +16,4 @@ full_right_cart : Animation
 full_up_cart : Animation
 full_down_cart : Animation
 
-game_map : Map
+game_map : ^Map
