@@ -8,23 +8,25 @@ import rl "vendor:raylib"
 
 game_logic :: proc() {
     is_moving := false
+
+    new_position := gs.cart.entity.position
     if rl.IsKeyDown(rl.KeyboardKey.UP) {
-        gs.cart.entity.position.y -= gs.cart.speed
+        new_position.y -= gs.cart.speed
         gs.cart.entity.direction = .UP
         is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
-        gs.cart.entity.position.y += gs.cart.speed
+        new_position.y += gs.cart.speed
         gs.cart.entity.direction = .DOWN
         is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
-        gs.cart.entity.position.x -= gs.cart.speed
+        new_position.x -= gs.cart.speed
         gs.cart.entity.direction = .LEFT
         is_moving = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
-        gs.cart.entity.position.x += gs.cart.speed
+        new_position.x += gs.cart.speed
         gs.cart.entity.direction = .RIGHT
         is_moving = true
     }
@@ -33,12 +35,24 @@ game_logic :: proc() {
     } else {
         gs.cart.is_empty = true
     }
-    gs.cart.entity.position.x = linalg.clamp(gs.cart.entity.position.x, 0, gs.window_size.x - gs.cart.entity.position.width)
-    gs.cart.entity.position.y = linalg.clamp(gs.cart.entity.position.y, 0, gs.window_size.y - gs.cart.entity.position.height)
+    new_position.x = linalg.clamp(new_position.x, 0, gs.window_size.x - new_position.width)
+    new_position.y = linalg.clamp(new_position.y, 0, gs.window_size.y - new_position.height)
+
+    if (!will_cart_collide(new_position)) {
+        gs.cart.entity.position = new_position
+        gs.cam.target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2};
+    }
 
     gs.cart.entity.is_animating = is_moving
+}
 
-    gs.cam.target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2};
+will_cart_collide :: proc(test_position : rl.Rectangle) -> bool {
+    for entity_to_test in gs.colliding_entities {
+        if (rl.CheckCollisionRecs(test_position, entity_to_test.position)) {
+            return true
+        }
+    }
+    return false
 }
 
 main :: proc() {
@@ -51,7 +65,7 @@ main :: proc() {
     }
     gs.cart = Cart {
         entity = Entity {
-            position = {x = gs.window_size.x / 2, y = gs.window_size.y / 2, width = 100, height=100,},
+            position = {x = gs.window_size.x / 2 - 200, y = gs.window_size.y / 2, width = 100, height=100,},
             direction = Direction.RIGHT,
             is_animating = false,
         },
@@ -64,6 +78,7 @@ main :: proc() {
         rotation = 0,
         zoom = 1
     }
+    gs.colliding_entities = make([dynamic]^Entity, 0, 100)
 
     rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
     rl.SetTargetFPS(60)

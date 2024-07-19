@@ -7,6 +7,7 @@ Game_State :: struct {
     cart: Cart,
     food: Entity,
     cam: rl.Camera2D,
+    colliding_entities: [dynamic]^Entity,
 }
 
 Entity :: struct {
@@ -42,3 +43,5 @@ Map :: struct {
 }
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
+
+solid_walls := []int{17, 19, 20, 09, 14, 42, 44, 45, 12}

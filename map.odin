@@ -36,6 +36,11 @@ read_map :: proc(filepath: string) {
             tile.is_animating = false
             tile.animation = animation
             append(&entities, tile)
+            for wall in solid_walls {
+                if (frame == wall) {
+                    append(&(gs.colliding_entities), tile)
+                }
+            }
 
         }
     }
