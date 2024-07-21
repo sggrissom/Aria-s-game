@@ -47,12 +47,12 @@ game_logic :: proc() {
 }
 
 will_cart_collide :: proc(test_position : rl.Rectangle) -> bool {
-    for entity_to_test in gs.colliding_entities {
-        if (rl.CheckCollisionRecs(test_position, entity_to_test.position)) {
-            return true
-        }
+    test_coordinate := get_coordiate(test_position)
+    defer free(test_coordinate)
+    if is_coordinate_mapped(get_coordiate(test_position)^) {
+        return false
     }
-    return false
+    return true
 }
 
 main :: proc() {
@@ -65,7 +65,7 @@ main :: proc() {
     }
     gs.cart = Cart {
         entity = Entity {
-            position = {x = gs.window_size.x / 2 - 200, y = gs.window_size.y / 2, width = 100, height=100,},
+            position = {x = gs.window_size.x / 2 - 200, y = gs.window_size.y / 2, width = tileWidth, height = tileWidth,},
             direction = Direction.RIGHT,
             is_animating = false,
         },
@@ -78,7 +78,7 @@ main :: proc() {
         rotation = 0,
         zoom = 1
     }
-    gs.colliding_entities = make([dynamic]^Entity, 0, 100)
+    gs.entities = make(map[rl.Vector2][dynamic]^Entity)
 
     rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
     rl.SetTargetFPS(60)
