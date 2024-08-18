@@ -35,8 +35,6 @@ game_logic :: proc() {
     } else {
         gs.cart.is_empty = true
     }
-    new_position.x = linalg.clamp(new_position.x, 0, gs.window_size.x - new_position.width)
-    new_position.y = linalg.clamp(new_position.y, 0, gs.window_size.y - new_position.height)
 
     if (!will_cart_collide(new_position)) {
         gs.cart.entity.position = new_position
@@ -50,9 +48,9 @@ will_cart_collide :: proc(test_position : rl.Rectangle) -> bool {
     test_coordinate := get_coordiate(test_position)
     defer free(test_coordinate)
     if is_coordinate_mapped(get_coordiate(test_position)^) {
-        return false
+        return true
     }
-    return true
+    return false
 }
 
 main :: proc() {
@@ -108,7 +106,7 @@ main :: proc() {
         sprite_columns = 3,
     }
 
-    read_map("resources/world.map")
+    read_map("resources/wall.map")
 
     gs.food.animation = &Animation {
         sprite_sheet = &food_sheet,
@@ -116,45 +114,47 @@ main :: proc() {
         frames_per_second = 1,
     }
 
+    CART_FRAMES :: 1
+
     empty_left_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {3, 4, 5},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     empty_right_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {6, 7, 8},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     empty_up_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {9, 10, 11},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     empty_down_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {0, 1, 2},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     full_left_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {3+12, 4+12, 5+12},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     full_right_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {6+12, 7+12, 8+12},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     full_up_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {9+12, 10+12, 11+12},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
     full_down_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {0+12, 1+12, 2+12},
-        frames_per_second = 5,
+        frames_per_second = CART_FRAMES,
     }
 
     for !rl.WindowShouldClose() {

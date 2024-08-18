@@ -34,7 +34,7 @@ Sprite_Sheet :: struct {
 Animation :: struct {
     sprite_sheet: ^Sprite_Sheet,
     frames_per_second: int,
-    frames: [dynamic]int,
+    frames: [dynamic]int, 
 }
 
 Map :: struct {
