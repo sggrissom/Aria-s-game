@@ -6,51 +6,124 @@ import "core:math/linalg"
 import "core:math/rand"
 import rl "vendor:raylib"
 
-game_logic :: proc() {
-    is_moving := false
+Vec2 :: rl.Vector2
+Rect :: rl.Rectangle
 
-    new_position := gs.cart.entity.position
-    if rl.IsKeyDown(rl.KeyboardKey.UP) {
-        new_position.y -= gs.cart.speed
-        gs.cart.entity.direction = .UP
-        is_moving = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
-        new_position.y += gs.cart.speed
-        gs.cart.entity.direction = .DOWN
-        is_moving = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
-        new_position.x -= gs.cart.speed
-        gs.cart.entity.direction = .LEFT
-        is_moving = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
-        new_position.x += gs.cart.speed
-        gs.cart.entity.direction = .RIGHT
-        is_moving = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
-        gs.cart.is_empty = false
-    } else {
-        gs.cart.is_empty = true
-    }
+Direction :: enum {UP, DOWN, LEFT, RIGHT}
+Scene :: enum {MENU, GAME}
 
-    if (!will_cart_collide(new_position)) {
-        gs.cart.entity.position = new_position
-        gs.cam.target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2};
-    }
+WINDOW_WIDTH :: 1280
+WINDOW_HEIGHT :: 720
+ZOOM :: 2
+BG_COLOR :: rl.BLACK
 
-    gs.cart.entity.is_animating = is_moving
+Game_State :: struct {
+    window_size: Vec2,
+    cart_id: int,
+    food: Entity,
+    cam: rl.Camera2D,
+    entities: [dynamic]Entity,
+    solid_tiles: [dynamic] Rect,
 }
 
-will_cart_collide :: proc(test_position : rl.Rectangle) -> bool {
-    test_coordinate := get_coordiate(test_position)
-    defer free(test_coordinate)
-    if is_coordinate_mapped(get_coordiate(test_position)^) {
-        return true
+Entity :: struct {
+    using collider: Rect,
+    velocity: Vec2,
+    move_speed: f32,
+    animation: ^Animation,
+    is_animating: bool,
+    is_removed: bool,
+    direction: Direction,
+    is_empty: bool,
+}
+
+Sprite_Sheet :: struct {
+    texture: rl.Texture2D,
+    sheet_size: Vec2,
+    sprite_rows: int,
+    sprite_columns: int,
+}
+
+Animation :: struct {
+    sprite_sheet: ^Sprite_Sheet,
+    frames_per_second: int,
+    frames: [dynamic]int, 
+}
+
+Map :: struct {
+    width: int,
+    height: int,
+    tiles: [dynamic]^Entity,
+}
+
+game_logic :: proc() {
+    cart := entity_get(gs.cart_id)
+    cart.velocity = {}
+    if rl.IsKeyDown(rl.KeyboardKey.UP) {
+        cart.velocity.y = -cart.move_speed
+        cart.direction = .UP
     }
-    return false
+    if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
+        cart.velocity.y = cart.move_speed
+        cart.direction = .DOWN
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
+        cart.velocity.x = -cart.move_speed
+        cart.direction = .LEFT
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
+        cart.velocity.x = cart.move_speed
+        cart.direction = .RIGHT
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
+        cart.is_empty = false
+    } else {
+        cart.is_empty = true
+    }
+
+    dt := rl.GetFrameTime()
+    physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+    
+    gs.cam.target = { cart.x - cart.width / 2, cart.y - cart.height / 2};
+    cart.is_animating = cart.velocity != 0
+}
+
+PHYSICS_ITERATIONS :: 8
+
+physics_update :: proc(entities: []Entity, static_colliders: []Rect, dt: f32)
+{
+    for &entity in entities {
+        if entity.is_removed do continue
+
+        for _ in 0 ..< PHYSICS_ITERATIONS {
+            step := dt / PHYSICS_ITERATIONS
+
+            entity.y += entity.velocity.y * step
+            for static in static_colliders {
+                if rl.CheckCollisionRecs(entity.collider, static) {
+                    if entity.velocity.y > 0 {
+                        entity.y = static.y - entity.height
+                    } else {
+                        entity.y = static.y + static.height
+                    }
+                    entity.velocity.y = 0
+                    break
+                }
+            }
+            entity.x += entity.velocity.x * step
+            for static in static_colliders {
+                if rl.CheckCollisionRecs(entity.collider, static) {
+                    if entity.velocity.x > 0 {
+                        entity.x = static.x - entity.width
+                    } else {
+                        entity.x = static.x + static.width
+                    }
+                    entity.velocity.x = 0
+                    break
+                }
+            }
+        }
+    }
 }
 
 main :: proc() {
@@ -58,25 +131,19 @@ main :: proc() {
         window_size = {1280, 720}
     }
     gs.food = Entity {
-        position = {width = 50, height = 50, x = 50, y = 50},
+        collider = {width = 50, height = 50, x = 50, y = 50},
         is_animating = true,
     }
-    gs.cart = Cart {
-        entity = Entity {
-            position = {x = gs.window_size.x / 2 - 200, y = gs.window_size.y / 2, width = tileWidth, height = tileWidth,},
-            direction = Direction.RIGHT,
-            is_animating = false,
-        },
-        speed = 7,
-        is_empty = true,
-    }
+    gs.cart_id = entity_create( {
+        collider = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
+        direction = Direction.RIGHT,
+        is_animating = false,
+        move_speed = 300,
+    })
     gs.cam = {
         offset = { gs.window_size.x / 2, gs.window_size.y / 2},
-        target = { gs.cart.entity.position.x - gs.cart.entity.position.width / 2, gs.cart.entity.position.y - gs.cart.entity.position.height / 2},
-        rotation = 0,
-        zoom = 1
+        zoom = ZOOM
     }
-    gs.entities = make(map[rl.Vector2][dynamic]^Entity)
 
     rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
     rl.SetTargetFPS(60)
@@ -111,10 +178,10 @@ main :: proc() {
     gs.food.animation = &Animation {
         sprite_sheet = &food_sheet,
         frames = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-        frames_per_second = 1,
+        frames_per_second = 3,
     }
 
-    CART_FRAMES :: 1
+    CART_FRAMES :: 3
 
     empty_left_cart = Animation {
         sprite_sheet = &cart_sheet,

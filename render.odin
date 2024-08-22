@@ -24,39 +24,41 @@ render_entity :: proc(entity: ^Entity) {
     if (entity.is_animating) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
-    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
+    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.collider)
 }
 
 render_map :: proc() {
-    for &tile in game_map.tiles {
-        assert(tile.animation.frames[0] >= 0)
-        render_entity(tile)
+    for &tile in gs.solid_tiles {
+        rl.DrawRectangleLinesEx(tile, 0.5, rl.RED)
     }
 }
 
 render_frame :: proc() {
     rl.BeginDrawing()
-    rl.ClearBackground(rl.WHITE)
+    rl.ClearBackground(BG_COLOR)
 
     rl.BeginMode2D(gs.cam)
+    
+    rl.DrawRectangleLinesEx(Rect{0, 0, 100, 100}, 0.5, rl.RED)
 
     animation :^Animation
 
-    if (gs.cart.entity.direction == Direction.UP) {
-        gs.cart.entity.animation = gs.cart.is_empty ? &empty_up_cart : &full_up_cart
+    cart := entity_get(gs.cart_id)
+    if (cart.direction == Direction.UP) {
+        cart.animation = cart.is_empty ? &empty_up_cart : &full_up_cart
     }
-    if (gs.cart.entity.direction == Direction.DOWN) {
-        gs.cart.entity.animation = gs.cart.is_empty ? &empty_down_cart : &full_down_cart
+    if (cart.direction == Direction.DOWN) {
+        cart.animation = cart.is_empty ? &empty_down_cart : &full_down_cart
     }
-    if (gs.cart.entity.direction == Direction.LEFT) {
-        gs.cart.entity.animation = gs.cart.is_empty ? &empty_left_cart : &full_left_cart
+    if (cart.direction == Direction.LEFT) {
+        cart.animation = cart.is_empty ? &empty_left_cart : &full_left_cart
     }
-    if (gs.cart.entity.direction == Direction.RIGHT) {
-        gs.cart.entity.animation = gs.cart.is_empty ? &empty_right_cart : &full_right_cart
+    if (cart.direction == Direction.RIGHT) {
+        cart.animation = cart.is_empty ? &empty_right_cart : &full_right_cart
     }
 
     render_map()
-    render_entity(&gs.cart.entity)
+    render_entity(cart)
     render_entity(&gs.food)
     rl.DrawFPS(-30, -30)
     rl.EndMode2D()

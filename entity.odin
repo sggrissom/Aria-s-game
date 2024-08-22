@@ -2,45 +2,21 @@ package main
 
 import rl "vendor:raylib"
 
-Game_State :: struct {
-    window_size: rl.Vector2,
-    cart: Cart,
-    food: Entity,
-    cam: rl.Camera2D,
-    entities: map[rl.Vector2][dynamic]^Entity,
+entity_create :: proc(entity: Entity) -> int {
+    for &e, i in gs.entities {
+        if e.is_removed {
+            e = entity
+            e.is_removed = false
+            return i
+        }
+    }
+
+    index := len(gs.entities)
+    append(&gs.entities, entity)
+
+    return index
 }
 
-Entity :: struct {
-    position: rl.Rectangle,
-    tile_coordinate: ^rl.Vector2,
-    direction: Direction,
-    animation: ^Animation,
-    is_animating: bool,
+entity_get :: proc(id: int) -> ^Entity {
+    return &gs.entities[id]
 }
-
-Cart :: struct {
-    entity: Entity,
-    speed: f32,
-    is_empty: bool,
-}
-
-Sprite_Sheet :: struct {
-    texture: rl.Texture2D,
-    sheet_size: rl.Vector2,
-    sprite_rows: int,
-    sprite_columns: int,
-}
-
-Animation :: struct {
-    sprite_sheet: ^Sprite_Sheet,
-    frames_per_second: int,
-    frames: [dynamic]int, 
-}
-
-Map :: struct {
-    width: int,
-    height: int,
-    tiles: [dynamic]^Entity,
-}
-
-Direction :: enum {UP, DOWN, LEFT, RIGHT}
