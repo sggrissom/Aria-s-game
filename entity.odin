@@ -17,6 +17,10 @@ entity_create :: proc(entity: Entity) -> int {
     return index
 }
 
+solid_tile_create :: proc(entity: Entity) {
+    append(&gs.solid_tiles, entity)
+}
+
 entity_get :: proc(id: int) -> ^Entity {
     return &gs.entities[id]
 }

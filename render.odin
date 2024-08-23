@@ -29,6 +29,7 @@ render_entity :: proc(entity: ^Entity) {
 
 render_map :: proc() {
     for &tile in gs.solid_tiles {
+        render_entity(&tile)
         rl.DrawRectangleLinesEx(tile, 0.5, rl.RED)
     }
 }

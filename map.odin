@@ -22,11 +22,39 @@ read_map :: proc(filepath: string) {
     for token, i in file_tokens[2:] {
         frame, ok := strconv.parse_int(token)
         if (ok && frame > 0) {
-            x := tileWidth * f32(i % map_width)
-            y := tileWidth * f32(i / map_width)
 
-            append(&gs.solid_tiles, Rect{x, y, tileWidth, tileWidth})
+            tile : Entity
+            tile.width = tileWidth
+            tile.height = tileWidth
+            tile.x = tileWidth * f32(i % map_width)
+            tile.y = tileWidth * f32(i / map_width)
+            tile.is_animating = false
+            tile.animation = get_wall_animation(frame)
+
+            solid_tile_create(tile)
         }
     }
 }
 
+get_wall_animation :: proc(wall_frame : int) -> ^Animation {
+    frame : int
+    rotation : f32 = 0
+    switch wall_frame {
+        case 1: frame = 20
+        case 2: frame = 22
+        case 3: frame = 43
+        case 4: frame = 17
+        case 5: frame = 09
+        case 6: frame = 14
+        case 7: frame = 45
+        case 8: frame = 42
+    }
+
+    animation := new(Animation)
+    animation.sprite_sheet = &walls_sheet
+    frames := make([dynamic]int, 1, 1)
+    frames[0] = frame
+    animation.frames = frames
+
+    return animation
+}

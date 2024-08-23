@@ -15,7 +15,7 @@ Scene :: enum {MENU, GAME}
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
 ZOOM :: 2
-BG_COLOR :: rl.BLACK
+BG_COLOR :: rl.GRAY
 
 Game_State :: struct {
     window_size: Vec2,
@@ -23,7 +23,7 @@ Game_State :: struct {
     food: Entity,
     cam: rl.Camera2D,
     entities: [dynamic]Entity,
-    solid_tiles: [dynamic] Rect,
+    solid_tiles: [dynamic]Entity,
 }
 
 Entity :: struct {
@@ -59,21 +59,27 @@ Map :: struct {
 game_logic :: proc() {
     cart := entity_get(gs.cart_id)
     cart.velocity = {}
+    cart.is_animating = false
+
     if rl.IsKeyDown(rl.KeyboardKey.UP) {
         cart.velocity.y = -cart.move_speed
         cart.direction = .UP
+        cart.is_animating = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
         cart.velocity.y = cart.move_speed
         cart.direction = .DOWN
+        cart.is_animating = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
         cart.velocity.x = -cart.move_speed
         cart.direction = .LEFT
+        cart.is_animating = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
         cart.velocity.x = cart.move_speed
         cart.direction = .RIGHT
+        cart.is_animating = true
     }
     if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
         cart.is_empty = false
@@ -85,12 +91,11 @@ game_logic :: proc() {
     physics_update(gs.entities[:], gs.solid_tiles[:], dt)
     
     gs.cam.target = { cart.x - cart.width / 2, cart.y - cart.height / 2};
-    cart.is_animating = cart.velocity != 0
 }
 
 PHYSICS_ITERATIONS :: 8
 
-physics_update :: proc(entities: []Entity, static_colliders: []Rect, dt: f32)
+physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
         if entity.is_removed do continue
@@ -100,7 +105,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Rect, dt: f32)
 
             entity.y += entity.velocity.y * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(entity.collider, static) {
+                if rl.CheckCollisionRecs(entity.collider, static.collider) {
                     if entity.velocity.y > 0 {
                         entity.y = static.y - entity.height
                     } else {
@@ -112,7 +117,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Rect, dt: f32)
             }
             entity.x += entity.velocity.x * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(entity.collider, static) {
+                if rl.CheckCollisionRecs(entity.collider, static.collider) {
                     if entity.velocity.x > 0 {
                         entity.x = static.x - entity.width
                     } else {
