@@ -27,7 +27,8 @@ Game_State :: struct {
 }
 
 Entity :: struct {
-    using collider: Rect,
+    collider: Rect,
+    using position: Rect,
     velocity: Vec2,
     move_speed: f32,
     animation: ^Animation,
@@ -95,6 +96,13 @@ game_logic :: proc() {
 
 PHYSICS_ITERATIONS :: 8
 
+get_static_collider :: proc(entity: Entity) -> Rect {
+    checkRect := entity.collider
+    checkRect.x += entity.x
+    checkRect.y += entity.y
+    return checkRect
+}
+
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
@@ -105,23 +113,24 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
             entity.y += entity.velocity.y * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(entity.collider, static.collider) {
+                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
                     if entity.velocity.y > 0 {
                         entity.y = static.y - entity.height
                     } else {
-                        entity.y = static.y + static.height
+                        entity.y = static.y + static.height - entity.collider.y
                     }
                     entity.velocity.y = 0
                     break
                 }
             }
+
             entity.x += entity.velocity.x * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(entity.collider, static.collider) {
+                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
                     if entity.velocity.x > 0 {
-                        entity.x = static.x - entity.width
+                        entity.x = static.x - entity.width + entity.collider.x
                     } else {
-                        entity.x = static.x + static.width
+                        entity.x = static.x + static.width - entity.collider.x
                     }
                     entity.velocity.x = 0
                     break
@@ -136,11 +145,14 @@ main :: proc() {
         window_size = {1280, 720}
     }
     gs.food = Entity {
-        collider = {width = 50, height = 50, x = 50, y = 50},
+        position = {width = 50, height = 50, x = 50, y = 50},
         is_animating = true,
     }
+    cartWidth :: 20
+    cartHeight :: 10
     gs.cart_id = entity_create( {
-        collider = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
+        position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
+        collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
         direction = Direction.RIGHT,
         is_animating = false,
         move_speed = 300,

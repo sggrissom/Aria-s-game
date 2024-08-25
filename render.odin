@@ -13,7 +13,7 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
     // Source rectangle (part of the texture to use for drawing)
     sourceRec : rl.Rectangle = { sprite_width * f32(sprite_column), (sprite_height * f32(sprite_row)), sprite_width, sprite_height };
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
-    rl.DrawRectangleLinesEx(dest, 0.5, rl.RED)
+    //rl.DrawRectangleLinesEx(dest, 0.5, rl.WHITE)
 }
 
 render_entity :: proc(entity: ^Entity) {
@@ -24,7 +24,9 @@ render_entity :: proc(entity: ^Entity) {
     if (entity.is_animating) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
-    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.collider)
+    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
+    
+    rl.DrawRectangleLinesEx(get_static_collider(entity^), 0.5, rl.GREEN)
 }
 
 render_map :: proc() {
@@ -39,8 +41,6 @@ render_frame :: proc() {
     rl.ClearBackground(BG_COLOR)
 
     rl.BeginMode2D(gs.cam)
-    
-    rl.DrawRectangleLinesEx(Rect{0, 0, 100, 100}, 0.5, rl.RED)
 
     animation :^Animation
 
