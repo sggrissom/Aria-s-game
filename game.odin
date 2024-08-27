@@ -20,6 +20,7 @@ BG_COLOR :: rl.GRAY
 Game_State :: struct {
     window_size: Vec2,
     cart_id: int,
+    player_id: int,
     food: Entity,
     cam: rl.Camera2D,
     entities: [dynamic]Entity,
@@ -58,6 +59,10 @@ Map :: struct {
 }
 
 game_logic :: proc() {
+    player := entity_get(gs.player_id)
+    player.velocity = {}
+    player.is_animating = false
+
     cart := entity_get(gs.cart_id)
     cart.velocity = {}
     cart.is_animating = false
@@ -82,6 +87,26 @@ game_logic :: proc() {
         cart.direction = .RIGHT
         cart.is_animating = true
     }
+    if rl.IsKeyDown(rl.KeyboardKey.W) {
+        player.velocity.y = -cart.move_speed
+        player.direction = .UP
+        player.is_animating = true
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.S) {
+        player.velocity.y = cart.move_speed
+        player.direction = .DOWN
+        player.is_animating = true
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.A) {
+        player.velocity.x = -cart.move_speed
+        player.direction = .LEFT
+        player.is_animating = true
+    }
+    if rl.IsKeyDown(rl.KeyboardKey.D) {
+        player.velocity.x = cart.move_speed
+        player.direction = .RIGHT
+        player.is_animating = true
+    }
     if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
         cart.is_empty = false
     } else {
@@ -91,7 +116,7 @@ game_logic :: proc() {
     dt := rl.GetFrameTime()
     physics_update(gs.entities[:], gs.solid_tiles[:], dt)
     
-    gs.cam.target = { cart.x - cart.width / 2, cart.y - cart.height / 2};
+    gs.cam.target = { player.x - player.width / 2, player.y - player.height / 2};
 }
 
 PHYSICS_ITERATIONS :: 8
@@ -157,6 +182,13 @@ main :: proc() {
         is_animating = false,
         move_speed = 300,
     })
+    gs.player_id = entity_create( {
+        position = {x = 200, y = 200, width = 48, height = 70,},
+        collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
+        direction = Direction.RIGHT,
+        is_animating = false,
+        move_speed = 300,
+    })
     gs.cam = {
         offset = { gs.window_size.x / 2, gs.window_size.y / 2},
         zoom = ZOOM
@@ -188,6 +220,12 @@ main :: proc() {
         sheet_size = {288, 768},
         sprite_rows = 8,
         sprite_columns = 3,
+    }
+    player_sheet = Sprite_Sheet {
+        texture = rl.LoadTexture("resources/char.png"),
+        sheet_size = {192, 70},
+        sprite_rows = 1,
+        sprite_columns = 4,
     }
 
     read_map("resources/wall.map")
@@ -238,6 +276,26 @@ main :: proc() {
     full_down_cart = Animation {
         sprite_sheet = &cart_sheet,
         frames = {0+12, 1+12, 2+12},
+        frames_per_second = CART_FRAMES,
+    }
+    player_up = Animation {
+        sprite_sheet = &player_sheet,
+        frames = {1},
+        frames_per_second = CART_FRAMES,
+    }
+    player_down = Animation {
+        sprite_sheet = &player_sheet,
+        frames = {3},
+        frames_per_second = CART_FRAMES,
+    }
+    player_left = Animation {
+        sprite_sheet = &player_sheet,
+        frames = {2},
+        frames_per_second = CART_FRAMES,
+    }
+    player_right = Animation {
+        sprite_sheet = &player_sheet,
+        frames = {0},
         frames_per_second = CART_FRAMES,
     }
 

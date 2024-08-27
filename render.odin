@@ -57,8 +57,23 @@ render_frame :: proc() {
     if (cart.direction == Direction.RIGHT) {
         cart.animation = cart.is_empty ? &empty_right_cart : &full_right_cart
     }
+    
+    player := entity_get(gs.player_id)
+    if (player.direction == Direction.UP) {
+        player.animation = &player_up
+    }
+    if (player.direction == Direction.DOWN) {
+        player.animation = &player_down
+    }
+    if (player.direction == Direction.LEFT) {
+        player.animation = &player_left
+    }
+    if (player.direction == Direction.RIGHT) {
+        player.animation = &player_right
+    }
 
     render_map()
+    render_entity(player)
     render_entity(cart)
     render_entity(&gs.food)
     rl.DrawFPS(-30, -30)
