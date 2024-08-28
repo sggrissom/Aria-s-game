@@ -183,8 +183,8 @@ main :: proc() {
         move_speed = 300,
     })
     gs.player_id = entity_create( {
-        position = {x = 200, y = 200, width = 48, height = 70,},
-        collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
+        position = {x = 200, y = 200, width = tileWidth, height = 70,},
+        collider = {x = (tileWidth - cartWidth)/2, y = 70 - cartHeight, width = cartWidth, height = cartHeight,},
         direction = Direction.RIGHT,
         is_animating = false,
         move_speed = 300,

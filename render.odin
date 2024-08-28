@@ -10,10 +10,9 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
     sprite_row : int = spriteToRender / sprite_sheet.sprite_columns
     sprite_column : int = spriteToRender % sprite_sheet.sprite_columns
 
-    // Source rectangle (part of the texture to use for drawing)
     sourceRec : rl.Rectangle = { sprite_width * f32(sprite_column), (sprite_height * f32(sprite_row)), sprite_width, sprite_height };
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
-    //rl.DrawRectangleLinesEx(dest, 0.5, rl.WHITE)
+    rl.DrawRectangleLinesEx(dest, 0.5, rl.WHITE)
 }
 
 render_entity :: proc(entity: ^Entity) {
