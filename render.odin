@@ -59,16 +59,16 @@ render_frame :: proc() {
     
     player := entity_get(gs.player_id)
     if (player.direction == Direction.UP) {
-        player.animation = &player_up
+        player.animation = player.is_animating ? &player_up_walk : &player_up
     }
     if (player.direction == Direction.DOWN) {
-        player.animation = &player_down
+        player.animation = player.is_animating ? &player_down_walk : &player_down
     }
     if (player.direction == Direction.LEFT) {
-        player.animation = &player_left
+        player.animation = player.is_animating ? &player_left_walk : &player_left
     }
     if (player.direction == Direction.RIGHT) {
-        player.animation = &player_right
+        player.animation = player.is_animating ? &player_right_walk : &player_right
     }
 
     render_map()

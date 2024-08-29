@@ -7,6 +7,7 @@ cart_sheet : Sprite_Sheet
 store_sheet : Sprite_Sheet
 walls_sheet : Sprite_Sheet
 player_sheet : Sprite_Sheet
+player_walk_sheet : Sprite_Sheet
 
 empty_left_cart : Animation
 empty_right_cart : Animation
@@ -21,5 +22,9 @@ player_left : Animation
 player_right : Animation
 player_up : Animation
 player_down : Animation
+player_left_walk : Animation
+player_right_walk : Animation
+player_up_walk : Animation
+player_down_walk : Animation
 
 game_map : ^Map

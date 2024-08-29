@@ -175,6 +175,7 @@ main :: proc() {
     }
     cartWidth :: 20
     cartHeight :: 10
+    playerHeight :: 70
     gs.cart_id = entity_create( {
         position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
         collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
@@ -183,8 +184,8 @@ main :: proc() {
         move_speed = 300,
     })
     gs.player_id = entity_create( {
-        position = {x = 200, y = 200, width = tileWidth, height = 70,},
-        collider = {x = (tileWidth - cartWidth)/2, y = 70 - cartHeight, width = cartWidth, height = cartHeight,},
+        position = {x = 200, y = 200, width = tileWidth, height = playerHeight,},
+        collider = {x = (tileWidth - cartWidth)/2, y = playerHeight - cartHeight, width = cartWidth, height = cartHeight,},
         direction = Direction.RIGHT,
         is_animating = false,
         move_speed = 300,
@@ -226,6 +227,12 @@ main :: proc() {
         sheet_size = {192, 70},
         sprite_rows = 1,
         sprite_columns = 4,
+    }
+    player_walk_sheet = Sprite_Sheet {
+        texture = rl.LoadTexture("resources/char_walk.png"),
+        sheet_size = {1152, 78},
+        sprite_rows = 1,
+        sprite_columns = 24,
     }
 
     read_map("resources/wall.map")
@@ -297,6 +304,26 @@ main :: proc() {
         sprite_sheet = &player_sheet,
         frames = {0},
         frames_per_second = CART_FRAMES,
+    }
+    player_up_walk = Animation {
+        sprite_sheet = &player_walk_sheet,
+        frames = {6,7,8,9,10,11},
+        frames_per_second = 6,
+    }
+    player_down_walk = Animation {
+        sprite_sheet = &player_walk_sheet,
+        frames = {18,19,20,21,22,23},
+        frames_per_second = 6,
+    }
+    player_left_walk = Animation {
+        sprite_sheet = &player_walk_sheet,
+        frames = {12,13,14,15,16,17},
+        frames_per_second = 6,
+    }
+    player_right_walk = Animation {
+        sprite_sheet = &player_walk_sheet,
+        frames = {0,1,2,3,4,5},
+        frames_per_second = 6,
     }
 
     for !rl.WindowShouldClose() {
