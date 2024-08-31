@@ -37,6 +37,7 @@ Entity :: struct {
     is_removed: bool,
     direction: Direction,
     is_empty: bool,
+    holding: ^Entity,
 }
 
 Sprite_Sheet :: struct {
@@ -67,26 +68,26 @@ game_logic :: proc() {
     cart.velocity = {}
     cart.is_animating = false
 
-    if rl.IsKeyDown(rl.KeyboardKey.UP) {
-        cart.velocity.y = -cart.move_speed
-        cart.direction = .UP
-        cart.is_animating = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
-        cart.velocity.y = cart.move_speed
-        cart.direction = .DOWN
-        cart.is_animating = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
-        cart.velocity.x = -cart.move_speed
-        cart.direction = .LEFT
-        cart.is_animating = true
-    }
-    if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
-        cart.velocity.x = cart.move_speed
-        cart.direction = .RIGHT
-        cart.is_animating = true
-    }
+    // if rl.IsKeyDown(rl.KeyboardKey.UP) {
+    //     cart.velocity.y = -cart.move_speed
+    //     cart.direction = .UP
+    //     cart.is_animating = true
+    // }
+    // if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
+    //     cart.velocity.y = cart.move_speed
+    //     cart.direction = .DOWN
+    //     cart.is_animating = true
+    // }
+    // if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
+    //     cart.velocity.x = -cart.move_speed
+    //     cart.direction = .LEFT
+    //     cart.is_animating = true
+    // }
+    // if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
+    //     cart.velocity.x = cart.move_speed
+    //     cart.direction = .RIGHT
+    //     cart.is_animating = true
+    // }
     if rl.IsKeyDown(rl.KeyboardKey.W) {
         player.velocity.y = -cart.move_speed
         player.direction = .UP
@@ -109,8 +110,12 @@ game_logic :: proc() {
     }
     if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
         cart.is_empty = false
+        player.holding = cart
+        cart.x = player.x
+        cart.y = player.y
     } else {
         cart.is_empty = true
+        player.holding = nil
     }
 
     dt := rl.GetFrameTime()
@@ -233,6 +238,12 @@ main :: proc() {
         sheet_size = {1152, 78},
         sprite_rows = 1,
         sprite_columns = 24,
+    }    
+    player_push_sheet = Sprite_Sheet {
+        texture = rl.LoadTexture("resources/char_push.png"),
+        sheet_size = {1156, 80},
+        sprite_rows = 1,
+        sprite_columns = 24,
     }
 
     read_map("resources/wall.map")
@@ -322,6 +333,26 @@ main :: proc() {
     }
     player_right_walk = Animation {
         sprite_sheet = &player_walk_sheet,
+        frames = {0,1,2,3,4,5},
+        frames_per_second = 6,
+    }
+    player_up_push = Animation {
+        sprite_sheet = &player_push_sheet,
+        frames = {6,7,8,9,10,11},
+        frames_per_second = 6,
+    }
+    player_down_push = Animation {
+        sprite_sheet = &player_push_sheet,
+        frames = {18,19,20,21,22,23},
+        frames_per_second = 6,
+    }
+    player_left_push = Animation {
+        sprite_sheet = &player_push_sheet,
+        frames = {12,13,14,15,16,17},
+        frames_per_second = 6,
+    }
+    player_right_push = Animation {
+        sprite_sheet = &player_push_sheet,
         frames = {0,1,2,3,4,5},
         frames_per_second = 6,
     }
