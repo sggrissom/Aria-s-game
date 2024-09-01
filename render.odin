@@ -53,8 +53,9 @@ render_frame :: proc() {
     render_map()
     render_entity(player)
     render_entity(cart)
-    render_entity(&gs.food)
-    rl.DrawFPS(-30, -30)
     rl.EndMode2D()
+
+    rl.DrawFPS(10, 10)
+    rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
     rl.EndDrawing()
 }
