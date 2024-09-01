@@ -89,14 +89,38 @@ game_logic :: proc() {
         player.direction = .RIGHT
         player.is_animating = true
     }
-    if rl.IsKeyDown(rl.KeyboardKey.SPACE) {
-        cart.is_empty = false
-        player.holding = cart
+    if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+        if (player.holding == nil) {
+            cart.is_removed = true
+            player.holding = cart
+        } else {
+            player.holding.is_removed = false
+            player.holding = nil
+        }
+    }
+
+    CART_OFFSET :: 37
+    if (player.holding != nil) {
         cart.x = player.x
         cart.y = player.y
-    } else {
-        cart.is_empty = true
-        player.holding = nil
+        cart.direction = player.direction
+        switch cart.direction {
+            case .UP: 
+            player.holding.y -= CART_OFFSET
+            break
+            case .DOWN: 
+            player.holding.y += CART_OFFSET
+            player.holding.x -= 3
+            break
+            case .LEFT: 
+            player.holding.x -= CART_OFFSET
+            player.holding.y += 25
+            break
+            case .RIGHT: 
+            player.holding.x += CART_OFFSET
+            player.holding.y += 25
+            break
+        }
     }
 
     dt := rl.GetFrameTime()
