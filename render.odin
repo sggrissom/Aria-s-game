@@ -23,6 +23,7 @@ render_entity :: proc(entity: ^Entity) {
     if (entity.is_animating) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
+    assert(frameIndex < len(entity.animation.frames))
     render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
     
     rl.DrawRectangleLinesEx(get_static_collider(entity^), 0.5, rl.GREEN)
@@ -44,10 +45,12 @@ render_frame :: proc() {
     animation :^Animation
 
     cart := entity_get(gs.cart_id)
-    cart.animation = cart_animation_map[{cart.direction, cart.state}]
+    cart_animation := cart_animations_map[{cart.direction, cart.state}]
+    cart.animation = &cart_animation
     
     player := entity_get(gs.player_id)
-    player.animation = player_animation_map[{player.direction, player.state}]
+    player_animation := player_animations_map[{player.direction, player.state}]
+    player.animation = &player_animation
     
     render_map()
     render_entity(player)
@@ -56,5 +59,4 @@ render_frame :: proc() {
     rl.DrawFPS(-30, -30)
     rl.EndMode2D()
     rl.EndDrawing()
-
 }

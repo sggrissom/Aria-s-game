@@ -11,7 +11,7 @@ Rect :: rl.Rectangle
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 Scene :: enum {MENU, GAME}
-AnimationState :: enum {STILL, WALK, HOLD, EMPTY, FULL}
+EntityState :: enum {STILL, WALK, HOLD, EMPTY, FULL}
 
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
@@ -34,7 +34,7 @@ Entity :: struct {
     velocity: Vec2,
     move_speed: f32,
     animation: ^Animation,
-    state: AnimationState,
+    state: EntityState,
     is_animating: bool,
     is_removed: bool,
     direction: Direction,

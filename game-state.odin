@@ -17,13 +17,13 @@ AnimationStateKey :: struct {
     state: EntityState,
 }
 
-cart_animation_map: map[DirectionStateKey]^Animation
-player_animation_map: map[DirectionStateKey]^Animation
+cart_animations_map: map[AnimationStateKey]Animation
+player_animations_map: map[AnimationStateKey]Animation
 
 init_player_animations :: proc()
 {
-    cart_animation_map = make(map[DirectionStateKey]^Animation)
-    player_animation_map = make(map[DirectionStateKey]^Animation)
+    cart_animations_map = make(map[AnimationStateKey]Animation)
+    player_animations_map = make(map[AnimationStateKey]Animation)
 
     gs.food.animation = &Animation {
         sprite_sheet = &food_sheet,
