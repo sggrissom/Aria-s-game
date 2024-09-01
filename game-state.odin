@@ -17,11 +17,14 @@ AnimationStateKey :: struct {
     state: EntityState,
 }
 
-cart_animations_map: Map[DirectionStateKey, ^Animation]
-player_animations_map: Map[DirectionStateKey, ^Animation]
+cart_animation_map: map[DirectionStateKey]^Animation
+player_animation_map: map[DirectionStateKey]^Animation
 
 init_player_animations :: proc()
 {
+    cart_animation_map = make(map[DirectionStateKey]^Animation)
+    player_animation_map = make(map[DirectionStateKey]^Animation)
+
     gs.food.animation = &Animation {
         sprite_sheet = &food_sheet,
         frames = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
