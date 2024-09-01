@@ -45,12 +45,10 @@ render_frame :: proc() {
     animation :^Animation
 
     cart := entity_get(gs.cart_id)
-    cart_animation := cart_animations_map[{cart.direction, cart.state}]
-    cart.animation = &cart_animation
+    cart.animation = cart_animations_map[{cart.direction, cart.state}]
     
     player := entity_get(gs.player_id)
-    player_animation := player_animations_map[{player.direction, player.state}]
-    player.animation = &player_animation
+    player.animation = player_animations_map[{player.direction, player.state}]
     
     render_map()
     render_entity(player)
