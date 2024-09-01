@@ -11,7 +11,7 @@ Rect :: rl.Rectangle
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 Scene :: enum {MENU, GAME}
-AnimationState :: enum {STILL, WALK, HOLDING}
+AnimationState :: enum {STILL, WALK, HOLD, EMPTY, FULL}
 
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
@@ -34,11 +34,12 @@ Entity :: struct {
     velocity: Vec2,
     move_speed: f32,
     animation: ^Animation,
+    state: AnimationState,
     is_animating: bool,
     is_removed: bool,
     direction: Direction,
     is_empty: bool,
-    holding: ^Entity,
+    holding: ^Entity,  
 }
 
 Sprite_Sheet :: struct {
@@ -64,30 +65,36 @@ game_logic :: proc() {
     player := entity_get(gs.player_id)
     player.velocity = {}
     player.is_animating = false
+    player.state = .STILL
 
     cart := entity_get(gs.cart_id)
     cart.velocity = {}
     cart.is_animating = false
+    cart.state = .EMPTY
 
     if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
         player.velocity.y = -cart.move_speed
         player.direction = .UP
         player.is_animating = true
+        player.state = .WALK
     }
     if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
         player.velocity.y = cart.move_speed
         player.direction = .DOWN
         player.is_animating = true
+        player.state = .WALK
     }
     if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
         player.velocity.x = -cart.move_speed
         player.direction = .LEFT
         player.is_animating = true
+        player.state = .WALK
     }
     if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
         player.velocity.x = cart.move_speed
         player.direction = .RIGHT
         player.is_animating = true
+        player.state = .WALK
     }
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
         if (player.holding == nil) {
@@ -101,6 +108,7 @@ game_logic :: proc() {
 
     CART_OFFSET :: 37
     if (player.holding != nil) {
+        player.state = .HOLD
         cart.x = player.x
         cart.y = player.y
         cart.direction = player.direction
@@ -206,115 +214,7 @@ main :: proc() {
     }
 
     read_map("resources/wall.map")
-
-    gs.food.animation = &Animation {
-        sprite_sheet = &food_sheet,
-        frames = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-        frames_per_second = 3,
-    }
-
-    CART_FRAMES :: 3
-
-    empty_left_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {3, 4, 5},
-        frames_per_second = CART_FRAMES,
-    }
-    empty_right_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {6, 7, 8},
-        frames_per_second = CART_FRAMES,
-    }
-    empty_up_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {9, 10, 11},
-        frames_per_second = CART_FRAMES,
-    }
-    empty_down_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {0, 1, 2},
-        frames_per_second = CART_FRAMES,
-    }
-    full_left_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {3+12, 4+12, 5+12},
-        frames_per_second = CART_FRAMES,
-    }
-    full_right_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {6+12, 7+12, 8+12},
-        frames_per_second = CART_FRAMES,
-    }
-    full_up_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {9+12, 10+12, 11+12},
-        frames_per_second = CART_FRAMES,
-    }
-    full_down_cart = Animation {
-        sprite_sheet = &cart_sheet,
-        frames = {0+12, 1+12, 2+12},
-        frames_per_second = CART_FRAMES,
-    }
-    player_up = Animation {
-        sprite_sheet = &player_sheet,
-        frames = {1},
-        frames_per_second = CART_FRAMES,
-    }
-    player_down = Animation {
-        sprite_sheet = &player_sheet,
-        frames = {3},
-        frames_per_second = CART_FRAMES,
-    }
-    player_left = Animation {
-        sprite_sheet = &player_sheet,
-        frames = {2},
-        frames_per_second = CART_FRAMES,
-    }
-    player_right = Animation {
-        sprite_sheet = &player_sheet,
-        frames = {0},
-        frames_per_second = CART_FRAMES,
-    }
-    player_up_walk = Animation {
-        sprite_sheet = &player_walk_sheet,
-        frames = {6,7,8,9,10,11},
-        frames_per_second = 6,
-    }
-    player_down_walk = Animation {
-        sprite_sheet = &player_walk_sheet,
-        frames = {18,19,20,21,22,23},
-        frames_per_second = 6,
-    }
-    player_left_walk = Animation {
-        sprite_sheet = &player_walk_sheet,
-        frames = {12,13,14,15,16,17},
-        frames_per_second = 6,
-    }
-    player_right_walk = Animation {
-        sprite_sheet = &player_walk_sheet,
-        frames = {0,1,2,3,4,5},
-        frames_per_second = 6,
-    }
-    player_up_push = Animation {
-        sprite_sheet = &player_push_sheet,
-        frames = {6,7,8,9,10,11},
-        frames_per_second = 6,
-    }
-    player_down_push = Animation {
-        sprite_sheet = &player_push_sheet,
-        frames = {18,19,20,21,22,23},
-        frames_per_second = 6,
-    }
-    player_left_push = Animation {
-        sprite_sheet = &player_push_sheet,
-        frames = {12,13,14,15,16,17},
-        frames_per_second = 6,
-    }
-    player_right_push = Animation {
-        sprite_sheet = &player_push_sheet,
-        frames = {0,1,2,3,4,5},
-        frames_per_second = 6,
-    }
+    init_player_animations()
 
     for !rl.WindowShouldClose() {
         game_logic()
