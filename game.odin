@@ -11,6 +11,7 @@ Rect :: rl.Rectangle
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 Scene :: enum {MENU, GAME}
+AnimationState :: enum {STILL, WALK, HOLDING}
 
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
@@ -68,42 +69,22 @@ game_logic :: proc() {
     cart.velocity = {}
     cart.is_animating = false
 
-    // if rl.IsKeyDown(rl.KeyboardKey.UP) {
-    //     cart.velocity.y = -cart.move_speed
-    //     cart.direction = .UP
-    //     cart.is_animating = true
-    // }
-    // if rl.IsKeyDown(rl.KeyboardKey.DOWN) {
-    //     cart.velocity.y = cart.move_speed
-    //     cart.direction = .DOWN
-    //     cart.is_animating = true
-    // }
-    // if rl.IsKeyDown(rl.KeyboardKey.LEFT) {
-    //     cart.velocity.x = -cart.move_speed
-    //     cart.direction = .LEFT
-    //     cart.is_animating = true
-    // }
-    // if rl.IsKeyDown(rl.KeyboardKey.RIGHT) {
-    //     cart.velocity.x = cart.move_speed
-    //     cart.direction = .RIGHT
-    //     cart.is_animating = true
-    // }
-    if rl.IsKeyDown(rl.KeyboardKey.W) {
+    if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
         player.velocity.y = -cart.move_speed
         player.direction = .UP
         player.is_animating = true
     }
-    if rl.IsKeyDown(rl.KeyboardKey.S) {
+    if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
         player.velocity.y = cart.move_speed
         player.direction = .DOWN
         player.is_animating = true
     }
-    if rl.IsKeyDown(rl.KeyboardKey.A) {
+    if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
         player.velocity.x = -cart.move_speed
         player.direction = .LEFT
         player.is_animating = true
     }
-    if rl.IsKeyDown(rl.KeyboardKey.D) {
+    if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
         player.velocity.x = cart.move_speed
         player.direction = .RIGHT
         player.is_animating = true
@@ -122,52 +103,6 @@ game_logic :: proc() {
     physics_update(gs.entities[:], gs.solid_tiles[:], dt)
     
     gs.cam.target = { player.x - player.width / 2, player.y - player.height / 2};
-}
-
-PHYSICS_ITERATIONS :: 8
-
-get_static_collider :: proc(entity: Entity) -> Rect {
-    checkRect := entity.collider
-    checkRect.x += entity.x
-    checkRect.y += entity.y
-    return checkRect
-}
-
-physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
-{
-    for &entity in entities {
-        if entity.is_removed do continue
-
-        for _ in 0 ..< PHYSICS_ITERATIONS {
-            step := dt / PHYSICS_ITERATIONS
-
-            entity.y += entity.velocity.y * step
-            for static in static_colliders {
-                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
-                    if entity.velocity.y > 0 {
-                        entity.y = static.y - entity.height
-                    } else {
-                        entity.y = static.y + static.height - entity.collider.y
-                    }
-                    entity.velocity.y = 0
-                    break
-                }
-            }
-
-            entity.x += entity.velocity.x * step
-            for static in static_colliders {
-                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
-                    if entity.velocity.x > 0 {
-                        entity.x = static.x - entity.width + entity.collider.x
-                    } else {
-                        entity.x = static.x + static.width - entity.collider.x
-                    }
-                    entity.velocity.x = 0
-                    break
-                }
-            }
-        }
-    }
 }
 
 main :: proc() {
