@@ -20,7 +20,7 @@ render_entity :: proc(entity: ^Entity) {
         return
     }
     frameIndex := 0
-    if (entity.is_animating) {
+    if (len(entity.animation.frames) > 1) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
     assert(frameIndex < len(entity.animation.frames))

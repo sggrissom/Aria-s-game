@@ -35,7 +35,6 @@ Entity :: struct {
     move_speed: f32,
     animation: ^Animation,
     state: EntityState,
-    is_animating: bool,
     is_removed: bool,
     direction: Direction,
     is_empty: bool,
@@ -64,36 +63,30 @@ Map :: struct {
 game_logic :: proc() {
     player := entity_get(gs.player_id)
     player.velocity = {}
-    player.is_animating = false
     player.state = .STILL
 
     cart := entity_get(gs.cart_id)
     cart.velocity = {}
-    cart.is_animating = false
     cart.state = .EMPTY
 
     if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
         player.velocity.y = -cart.move_speed
         player.direction = .UP
-        player.is_animating = true
         player.state = .WALK
     }
     if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
         player.velocity.y = cart.move_speed
         player.direction = .DOWN
-        player.is_animating = true
         player.state = .WALK
     }
     if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
         player.velocity.x = -cart.move_speed
         player.direction = .LEFT
-        player.is_animating = true
         player.state = .WALK
     }
     if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
         player.velocity.x = cart.move_speed
         player.direction = .RIGHT
-        player.is_animating = true
         player.state = .WALK
     }
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
@@ -143,7 +136,6 @@ main :: proc() {
     }
     gs.food = Entity {
         position = {width = 50, height = 50, x = 50, y = 50},
-        is_animating = true,
     }
     cartWidth :: 20
     cartHeight :: 10
@@ -152,14 +144,12 @@ main :: proc() {
         position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
         collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
         direction = Direction.RIGHT,
-        is_animating = false,
         move_speed = 300,
     })
     gs.player_id = entity_create( {
         position = {x = 200, y = 200, width = tileWidth, height = playerHeight,},
         collider = {x = (tileWidth - cartWidth)/2, y = playerHeight - cartHeight, width = cartWidth, height = cartHeight,},
         direction = Direction.RIGHT,
-        is_animating = false,
         move_speed = 300,
     })
     gs.cam = {
