@@ -51,11 +51,17 @@ render_frame :: proc() {
     player.animation = player_animations_map[{player.direction, player.state}]
     
     render_map()
-    render_entity(player)
-    render_entity(cart)
+    if (player.y < cart.y) {
+        render_entity(player)
+        render_entity(cart)
+    } else {
+        render_entity(cart)
+        render_entity(player)
+    }
     rl.EndMode2D()
 
     rl.DrawFPS(10, 10)
     rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
+    rl.DrawText(rl.TextFormat("(%s)", player.state), 10, 80, 20, rl.BLUE)
     rl.EndDrawing()
 }

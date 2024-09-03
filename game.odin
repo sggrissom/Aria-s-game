@@ -99,7 +99,7 @@ game_logic :: proc() {
         }
     }
 
-    CART_OFFSET :: 37
+    CART_OFFSET :: 22
     if (player.holding != nil) {
         player.state = .HOLD
         cart.x = player.x
@@ -108,18 +108,19 @@ game_logic :: proc() {
         switch cart.direction {
             case .UP: 
             player.holding.y -= CART_OFFSET
+            player.holding.x -= 8
             break
             case .DOWN: 
             player.holding.y += CART_OFFSET
-            player.holding.x -= 3
+            player.holding.x -= 9
             break
             case .LEFT: 
-            player.holding.x -= CART_OFFSET
-            player.holding.y += 25
+            player.holding.x -= CART_OFFSET + 14
+            player.holding.y += 5
             break
             case .RIGHT: 
             player.holding.x += CART_OFFSET
-            player.holding.y += 25
+            player.holding.y += 5
             break
         }
     }
@@ -137,18 +138,19 @@ main :: proc() {
     gs.food = Entity {
         position = {width = 50, height = 50, x = 50, y = 50},
     }
-    cartWidth :: 20
-    cartHeight :: 10
-    playerHeight :: 70
+    colliderWidth :: 20
+    colliderHeight :: 10
+    playerHeight :: 48
+    playerWidth :: 33
     gs.cart_id = entity_create( {
         position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
-        collider = {x = (tileWidth - cartWidth)/2, y = tileWidth - cartHeight, width = cartWidth, height = cartHeight,},
+        collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,},
         direction = Direction.RIGHT,
         move_speed = 300,
     })
     gs.player_id = entity_create( {
-        position = {x = 200, y = 200, width = tileWidth, height = playerHeight,},
-        collider = {x = (tileWidth - cartWidth)/2, y = playerHeight - cartHeight, width = cartWidth, height = cartHeight,},
+        position = {x = 200, y = 200, width = playerWidth, height = playerHeight,},
+        collider = {x = (playerWidth - colliderWidth)/2, y = playerHeight - colliderHeight, width = colliderWidth, height = colliderHeight,},
         direction = Direction.RIGHT,
         move_speed = 300,
     })
