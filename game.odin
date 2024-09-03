@@ -18,6 +18,11 @@ WINDOW_HEIGHT :: 720
 ZOOM :: 2
 BG_COLOR :: rl.GRAY
 
+colliderWidth :: 20
+colliderHeight :: 10
+playerHeight :: 48
+playerWidth :: 33
+
 Game_State :: struct {
     window_size: Vec2,
     cart_id: int,
@@ -113,18 +118,22 @@ game_logic :: proc() {
             case .UP: 
             player.holding.y -= CART_OFFSET
             player.holding.x -= 8
+            player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = 0, width = colliderWidth, height = colliderHeight,}
             break
             case .DOWN: 
             player.holding.y += CART_OFFSET
             player.holding.x -= 9
+            player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,}
             break
             case .LEFT: 
             player.holding.x -= CART_OFFSET + 14
             player.holding.y += 5
+            player.holding.collider = {x = 0, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
             break
             case .RIGHT: 
             player.holding.x += CART_OFFSET
             player.holding.y += 5
+            player.holding.collider = {x = tileWidth - colliderHeight, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
             break
         }
     }
@@ -139,10 +148,6 @@ main :: proc() {
     gs.food = Entity {
         position = {width = 50, height = 50, x = 50, y = 50},
     }
-    colliderWidth :: 20
-    colliderHeight :: 10
-    playerHeight :: 48
-    playerWidth :: 33
     gs.cart_id = entity_create( {
         position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
         collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,},
