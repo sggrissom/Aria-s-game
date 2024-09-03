@@ -99,6 +99,10 @@ game_logic :: proc() {
         }
     }
 
+
+    dt := rl.GetFrameTime()
+    physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+
     CART_OFFSET :: 22
     if (player.holding != nil) {
         player.state = .HOLD
@@ -124,9 +128,6 @@ game_logic :: proc() {
             break
         }
     }
-
-    dt := rl.GetFrameTime()
-    physics_update(gs.entities[:], gs.solid_tiles[:], dt)
     
     gs.cam.target = { player.x - player.width / 2, player.y - player.height / 2};
 }
