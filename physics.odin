@@ -33,7 +33,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                     entity.velocity.y = 0
                     break
                 }
-                if entity.holding != nil && rl.CheckCollisionRecs(get_static_collider(entity.holding), get_static_collider(static)) {
+                if entity.holding.item != nil && rl.CheckCollisionRecs(get_static_collider(entity.holding.item^), get_static_collider(static)) {
                     if entity.velocity.y > 0 {
                         entity.y = static.y - entity.height
                     } else {
@@ -55,7 +55,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                     entity.velocity.x = 0
                     break
                 }
-                if entity.holding != nil && rl.CheckCollisionRecs(get_static_collider(entity.holding), get_static_collider(static)) {
+                if entity.holding.item != nil && rl.CheckCollisionRecs(get_static_collider(entity.holding.item^), get_static_collider(static)) {
                     if entity.velocity.x > 0 {
                         entity.x = static.x - entity.width + entity.collider.x
                     } else {
