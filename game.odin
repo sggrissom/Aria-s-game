@@ -43,7 +43,12 @@ Entity :: struct {
     is_removed: bool,
     direction: Direction,
     is_empty: bool,
-    holding: ^Entity,  
+    holding: HeldEntity,  
+}
+
+HeldEntity :: struct {
+    using entity: ^Entity,
+    offset: Rect,
 }
 
 Sprite_Sheet :: struct {
@@ -95,12 +100,13 @@ game_logic :: proc() {
         player.state = .WALK
     }
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-        if (player.holding == nil) {
+        if (player.holding.entity == nil) {
             cart.is_removed = true
-            player.holding = cart
+            player.holding.entity = cart
+            player.holding.offset = {}
         } else {
             player.holding.is_removed = false
-            player.holding = nil
+            player.holding.entity = nil
         }
     }
 
@@ -109,30 +115,30 @@ game_logic :: proc() {
     physics_update(gs.entities[:], gs.solid_tiles[:], dt)
 
     CART_OFFSET :: 22
-    if (player.holding != nil) {
+    if (player.holding.entity != nil) {
         player.state = .HOLD
-        cart.x = player.x
-        cart.y = player.y
-        cart.direction = player.direction
-        switch cart.direction {
+        player.holding.x = player.x
+        player.holding.y = player.y
+        player.holding.direction = player.direction
+        switch player.holding.direction {
             case .UP: 
-            player.holding.y -= CART_OFFSET
-            player.holding.x -= 8
+            player.holding.offset.y -= CART_OFFSET
+            player.holding.offset.x -= 8
             player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = 0, width = colliderWidth, height = colliderHeight,}
             break
             case .DOWN: 
-            player.holding.y += CART_OFFSET
-            player.holding.x -= 9
+            player.holding.offset.y += CART_OFFSET
+            player.holding.offset.x -= 9
             player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,}
             break
             case .LEFT: 
-            player.holding.x -= CART_OFFSET + 14
-            player.holding.y += 5
+            player.holding.offset.x -= CART_OFFSET + 14
+            player.holding.offset.y += 5
             player.holding.collider = {x = 0, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
             break
             case .RIGHT: 
-            player.holding.x += CART_OFFSET
-            player.holding.y += 5
+            player.holding.offset.x += CART_OFFSET
+            player.holding.offset.y += 5
             player.holding.collider = {x = tileWidth - colliderHeight, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
             break
         }
