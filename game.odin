@@ -31,6 +31,7 @@ Game_State :: struct {
     cam: rl.Camera2D,
     entities: [dynamic]Entity,
     solid_tiles: [dynamic]Entity,
+    debug_shapes: [dynamic]Debug_Shape,
 }
 
 Entity :: struct {
