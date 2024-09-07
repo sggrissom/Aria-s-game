@@ -220,18 +220,7 @@ main :: proc() {
     init_player_animations()
 
     for !rl.WindowShouldClose() {
-        rl.BeginDrawing()
-        rl.ClearBackground(BG_COLOR)
-        rl.BeginMode2D(gs.cam)
-
         game_logic()
         render_frame()
-        
-        rl.EndMode2D()
-
-        rl.DrawFPS(10, 10)
-        rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
-        rl.DrawText(rl.TextFormat("(%s)", player.state), 10, 80, 20, rl.BLUE)
-        rl.EndDrawing()
     }
 }

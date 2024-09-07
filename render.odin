@@ -37,6 +37,10 @@ render_map :: proc() {
 }
 
 render_frame :: proc() {
+    rl.BeginDrawing()
+    rl.ClearBackground(BG_COLOR)
+    rl.BeginMode2D(gs.cam)
+
     animation :^Animation
 
     cart := entity_get(gs.cart_id)
@@ -53,4 +57,11 @@ render_frame :: proc() {
         render_entity(cart)
         render_entity(player)
     }
+    
+    rl.EndMode2D()
+
+    rl.DrawFPS(10, 10)
+    rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
+    rl.DrawText(rl.TextFormat("(%s)", player.state), 10, 80, 20, rl.BLUE)
+    rl.EndDrawing()
 }
