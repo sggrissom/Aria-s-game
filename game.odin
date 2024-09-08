@@ -8,6 +8,7 @@ import rl "vendor:raylib"
 
 Vec2 :: rl.Vector2
 Rect :: rl.Rectangle
+Entity_Id :: distinct int
 
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 Scene :: enum {MENU, GAME}
@@ -30,8 +31,8 @@ playerWidth :: 33
 
 Game_State :: struct {
     window_size: Vec2,
-    cart_id: int,
-    player_id: int,
+    cart_id: Entity_Id,
+    player_id: Entity_Id,
     cam: rl.Camera2D,
     entities: [dynamic]Entity,
     solid_tiles: [dynamic]Entity,
