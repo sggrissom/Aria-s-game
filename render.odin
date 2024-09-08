@@ -26,7 +26,7 @@ render_entity :: proc(entity: ^Entity) {
     assert(frameIndex < len(entity.animation.frames))
     render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
     
-    rl.DrawRectangleLinesEx(get_static_collider(entity^), 0.5, rl.GREEN)
+    //rl.DrawRectangleLinesEx(get_static_collider(entity^), 0.5, rl.GREEN)
 }
 
 render_map :: proc() {
