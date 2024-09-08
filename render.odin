@@ -58,6 +58,21 @@ render_frame :: proc() {
         render_entity(player)
     }
     
+    for s in gs.debug_shapes {
+			switch v in s {
+			case Debug_Line:
+				rl.DrawLineEx(v.start, v.end, v.thickness, v.color)
+			case Debug_Rect:
+				rl.DrawRectangleLinesEx(
+					{v.pos.x, v.pos.y, v.size.x, v.size.y},
+					v.thickness,
+					v.color,
+				)
+			case Debug_Circle:
+				rl.DrawCircleLinesV(v.pos, v.radius, v.color)
+			}
+		}
+    
     rl.EndMode2D()
 
     rl.DrawFPS(10, 10)
