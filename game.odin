@@ -46,7 +46,8 @@ Entity :: struct {
     animation: ^Animation,
     state: EntityState,
     direction: Direction,
-    holding: HeldEntity,  
+    holding: HeldEntity,
+    flags: bit_set[Entity_Flags],
 }
 
 HeldEntity :: struct {
@@ -77,34 +78,43 @@ game_logic :: proc() {
     player := entity_get(gs.player_id)
     player.velocity = {}
     player.state = .STILL
+    player.flags -= {.In_Motion}
 
     cart := entity_get(gs.cart_id)
     cart.velocity = {}
     cart.state = .EMPTY
+    cart.flags -= {.In_Motion}
 
     if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
         player.velocity.y = -cart.move_speed
         player.direction = .UP
         player.state = .WALK
+        player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
         player.velocity.y = cart.move_speed
         player.direction = .DOWN
         player.state = .WALK
+        player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
         player.velocity.x = -cart.move_speed
         player.direction = .LEFT
         player.state = .WALK
+        player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
         player.velocity.x = cart.move_speed
         player.direction = .RIGHT
         player.state = .WALK
+        player.flags += {.In_Motion}
     }
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
         if (player.holding.item == nil) {
             cart.flags += {.Removed}
+            if .In_Motion in player.flags {
+                cart.flags += {.In_Motion}
+            }
             player.holding.item = cart
             player.holding.offset_map = make(map[Direction]Vec2)
             player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
@@ -152,9 +162,6 @@ game_logic :: proc() {
 main :: proc() {
     gs = Game_State {
         window_size = {1280, 720}
-    }
-    gs.food = Entity {
-        position = {width = 50, height = 50, x = 50, y = 50},
     }
     gs.cart_id = entity_create( {
         position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},

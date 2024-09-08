@@ -25,12 +25,6 @@ init_player_animations :: proc()
     cart_animations_map = make(map[AnimationStateKey]^Animation)
     player_animations_map = make(map[AnimationStateKey]^Animation)
 
-    gs.food.animation = &Animation {
-        sprite_sheet = &food_sheet,
-        frames = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
-        frames_per_second = 3,
-    }
-
     CART_FRAMES :: 3
 
     cart_animations_map[{.LEFT, .EMPTY}] = new(Animation)
