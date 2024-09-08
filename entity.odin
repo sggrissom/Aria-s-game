@@ -7,7 +7,7 @@ entity_create :: proc(entity: Entity) -> Entity_Id {
         if .Removed in e.flags {
             e = entity
             e.flags -= {.Removed}
-            return i
+            return Entity_Id(i)
         }
     }
 
