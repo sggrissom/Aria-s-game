@@ -17,7 +17,7 @@ get_static_collider :: proc(entity: Entity) -> Rect {
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
-        if entity.is_removed do continue
+        if .Removed in entity.flags do continue
 
         for _ in 0 ..< PHYSICS_ITERATIONS {
             step := dt / PHYSICS_ITERATIONS

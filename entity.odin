@@ -4,9 +4,9 @@ import rl "vendor:raylib"
 
 entity_create :: proc(entity: Entity) -> int {
     for &e, i in gs.entities {
-        if e.is_removed {
+        if .Removed in e.flags {
             e = entity
-            e.is_removed = false
+            e.flags -= {.Removed}
             return i
         }
     }

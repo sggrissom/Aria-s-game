@@ -12,6 +12,11 @@ Rect :: rl.Rectangle
 Direction :: enum {UP, DOWN, LEFT, RIGHT}
 Scene :: enum {MENU, GAME}
 EntityState :: enum {STILL, WALK, HOLD, EMPTY, FULL}
+Entity_Flags :: enum {
+	Removed,
+	Debug_Draw,
+	In_Motion,
+}
 
 WINDOW_WIDTH :: 1280
 WINDOW_HEIGHT :: 720
@@ -27,7 +32,6 @@ Game_State :: struct {
     window_size: Vec2,
     cart_id: int,
     player_id: int,
-    food: Entity,
     cam: rl.Camera2D,
     entities: [dynamic]Entity,
     solid_tiles: [dynamic]Entity,
@@ -41,9 +45,7 @@ Entity :: struct {
     move_speed: f32,
     animation: ^Animation,
     state: EntityState,
-    is_removed: bool,
     direction: Direction,
-    is_empty: bool,
     holding: HeldEntity,  
 }
 
@@ -102,7 +104,7 @@ game_logic :: proc() {
     }
     if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
         if (player.holding.item == nil) {
-            cart.is_removed = true
+            cart.flags += {.Removed}
             player.holding.item = cart
             player.holding.offset_map = make(map[Direction]Vec2)
             player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
@@ -111,7 +113,7 @@ game_logic :: proc() {
             player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
         } else {
             delete(player.holding.offset_map)
-            player.holding.is_removed = false
+            player.holding.flags -= {.Removed}
             player.holding.item = nil
         }
     }
