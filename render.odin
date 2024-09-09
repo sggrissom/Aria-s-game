@@ -59,7 +59,7 @@ render_frame :: proc() {
     }
     
     for s in gs.debug_shapes {
-			switch v in s {
+		switch v in s {
 			case Debug_Line:
 				rl.DrawLineEx(v.start, v.end, v.thickness, v.color)
 			case Debug_Rect:
@@ -70,8 +70,8 @@ render_frame :: proc() {
 				)
 			case Debug_Circle:
 				rl.DrawCircleLinesV(v.pos, v.radius, v.color)
-			}
-		}
+        }
+    }
     
     rl.EndMode2D()
 
@@ -79,4 +79,6 @@ render_frame :: proc() {
     rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
     rl.DrawText(rl.TextFormat("(%s)", player.state), 10, 80, 20, rl.BLUE)
     rl.EndDrawing()
+
+    clear(&gs.debug_shapes)
 }

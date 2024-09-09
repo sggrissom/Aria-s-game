@@ -6,8 +6,6 @@ import "core:os"
 import "core:math"
 import rl "vendor:raylib"
 
-PHYSICS_ITERATIONS :: 8
-
 get_static_collider :: proc(entity: Entity) -> Rect {
     checkRect := entity.collider
     checkRect.x += entity.x
@@ -29,41 +27,59 @@ get_static_collider :: proc(entity: Entity) -> Rect {
     return checkRect
 }
 
+resolved : Rect
+
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
         if .Removed in entity.flags do continue
+
+        entity.x += entity.input.x * entity.move_speed * dt
+        entity.y += entity.input.y * entity.move_speed * dt
+
         entity_collider := get_static_collider(entity)
+
+        for static in static_colliders {
+            normal : Vec2
+
+            collision_rect := rl.GetCollisionRec(entity_collider, static)
+            if collision_rect == {} do continue
+
+            resolved = entity_collider
+            center_static := Vec2 {
+                static.x + static.width / 2,
+                static.y + static.height / 2,
+            }
+            center_moving := Vec2 {
+                collision_rect.x + collision_rect.width / 2,
+                collision_rect.y + collision_rect.height / 2,
+            }
+            dist := center_moving - center_static
+            
+            if abs(dist.x) > abs(dist.y) {
+                normal.x = 1 if dist.x > 0 else -1
+            } else {
+                normal.y = 1 if dist.y > 0 else -1
+            }
+
+            if normal.x < 0 {
+                //Left
+                resolved.x = static.x - collision_rect.width
+            } else if normal.x > 0 {
+                //Right
+                resolved.x = static.x + static.width
+            } else if normal.y < 0 {
+                //Up
+                resolved.y = static.y - collision_rect.height
+            } else if normal.y > 0 {
+                //Down
+                resolved.x = static.y - static.height
+            }
+        }
+
         debug_draw_rect({entity_collider.x, entity_collider.y}, {entity_collider.width, entity_collider.height}, 1, rl.GREEN)
-
-        for _ in 0 ..< PHYSICS_ITERATIONS {
-            step := dt / PHYSICS_ITERATIONS
-
-            entity.y += entity.velocity.y * step
-            for static in static_colliders {
-                if rl.CheckCollisionRecs(entity_collider, get_static_collider(static)) {
-                    if entity.velocity.y > 0 {
-                        entity.y = static.y - entity.height
-                    } else {
-                        entity.y = static.y + static.height - entity_collider.y
-                    }
-                    entity.velocity.y = 0
-                    break
-                }
-            }
-
-            entity.x += entity.velocity.x * step
-            for static in static_colliders {
-                if rl.CheckCollisionRecs(entity_collider, get_static_collider(static)) {
-                    if entity.velocity.x > 0 {
-                        entity.x = static.x - entity_collider.width - entity_collider.x
-                    } else {
-                        entity.x = static.x + static.width - entity_collider.x
-                    }
-                    entity.velocity.x = 0
-                    break
-                }
-            }
+        if resolved != {} {
+            debug_draw_rect({resolved.x, resolved.y}, {resolved.width, resolved.height}, 1, rl.RED)
         }
     }
 }

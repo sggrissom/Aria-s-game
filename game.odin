@@ -42,7 +42,7 @@ Game_State :: struct {
 Entity :: struct {
     collider: Rect,
     using position: Rect,
-    velocity: Vec2,
+    input: Vec2,
     move_speed: f32,
     animation: ^Animation,
     state: EntityState,
@@ -77,35 +77,35 @@ Map :: struct {
 
 game_logic :: proc() {
     player := entity_get(gs.player_id)
-    player.velocity = {}
+    player.input = {}
     player.state = .STILL
     player.flags -= {.In_Motion}
 
     cart := entity_get(gs.cart_id)
-    cart.velocity = {}
+    cart.input = {}
     cart.state = .EMPTY
     cart.flags -= {.In_Motion}
 
     if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
-        player.velocity.y = -cart.move_speed
+        player.input.y = -1
         player.direction = .UP
         player.state = .WALK
         player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
-        player.velocity.y = cart.move_speed
+        player.input.y = 1
         player.direction = .DOWN
         player.state = .WALK
         player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
-        player.velocity.x = -cart.move_speed
+        player.input.x = -1
         player.direction = .LEFT
         player.state = .WALK
         player.flags += {.In_Motion}
     }
     if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
-        player.velocity.x = cart.move_speed
+        player.input.x = 1
         player.direction = .RIGHT
         player.state = .WALK
         player.flags += {.In_Motion}
