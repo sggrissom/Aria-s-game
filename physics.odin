@@ -73,7 +73,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                 resolved.y = static.y - collision_rect.height
             } else if normal.y > 0 {
                 //Down
-                resolved.x = static.y - static.height
+                resolved.y = static.y - static.height
             }
         }
 
