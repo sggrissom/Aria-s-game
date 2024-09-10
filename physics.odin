@@ -27,8 +27,6 @@ get_static_collider :: proc(entity: Entity) -> Rect {
     return checkRect
 }
 
-resolved : Rect
-
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
@@ -39,13 +37,13 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
         entity_collider := get_static_collider(entity)
 
+        resolved := entity_collider
+
         for static in static_colliders {
             normal : Vec2
 
             collision_rect := rl.GetCollisionRec(entity_collider, static)
             if collision_rect == {} do continue
-
-            resolved = entity_collider
             center_static := Vec2 {
                 static.x + static.width / 2,
                 static.y + static.height / 2,
@@ -64,16 +62,16 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
             if normal.x < 0 {
                 //Left
-                resolved.x = static.x - collision_rect.width
+                resolved.x = static.x - resolved.width
             } else if normal.x > 0 {
                 //Right
                 resolved.x = static.x + static.width
             } else if normal.y < 0 {
                 //Up
-                resolved.y = static.y - collision_rect.height
+                resolved.y = static.y - resolved.height
             } else if normal.y > 0 {
                 //Down
-                resolved.y = static.y - static.height
+                resolved.y = static.y + static.height
             }
         }
 
