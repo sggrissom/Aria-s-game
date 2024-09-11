@@ -27,6 +27,32 @@ get_static_collider :: proc(entity: Entity) -> Rect {
     return checkRect
 }
 
+get_resolved_rect :: proc(dist: Vec2, static: Entity, resolved: ^Rect) -> Rect
+{
+    normal : Vec2
+    if abs(dist.x) > abs(dist.y) {
+        normal.x = 1 if dist.x > 0 else -1
+    } else {
+        normal.y = 1 if dist.y > 0 else -1
+    }
+
+    if normal.x < 0 && !rl.CheckCollisionRecs({static.x - resolved.width, resolved.y, resolved.width, resolved.height}, static) {
+        //Left
+        resolved.x = static.x - resolved.width
+    } else if normal.x > 0 && !rl.CheckCollisionRecs({static.x + static.width, resolved.y, resolved.width, resolved.height}, static) {
+        //Right
+        resolved.x = static.x + static.width
+    } else if normal.y < 0 && !rl.CheckCollisionRecs({resolved.x, static.y - resolved.height, resolved.width, resolved.height}, static) {
+        //Up
+        resolved.y = static.y - resolved.height
+    } else if normal.y > 0 && !rl.CheckCollisionRecs({resolved.x, static.y + static.height, resolved.width, resolved.height}, static) {
+        //Down
+        resolved.y = static.y + static.height
+    }
+
+    return resolved^
+}
+
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity in entities {
@@ -37,11 +63,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
         entity_collider := get_static_collider(entity)
 
-        resolved := entity_collider
-
         for static in static_colliders {
-            normal : Vec2
-
             collision_rect := rl.GetCollisionRec(entity_collider, static)
             if collision_rect == {} do continue
             center_static := Vec2 {
@@ -54,30 +76,14 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
             }
             dist := center_moving - center_static
             
-            if abs(dist.x) > abs(dist.y) {
-                normal.x = 1 if dist.x > 0 else -1
-            } else {
-                normal.y = 1 if dist.y > 0 else -1
-            }
+            resolved := entity_collider
+            resolved = get_resolved_rect(dist, static, &resolved)
 
-            if normal.x < 0 {
-                //Left
-                resolved.x = static.x - resolved.width
-            } else if normal.x > 0 {
-                //Right
-                resolved.x = static.x + static.width
-            } else if normal.y < 0 {
-                //Up
-                resolved.y = static.y - resolved.height
-            } else if normal.y > 0 {
-                //Down
-                resolved.y = static.y + static.height
-            }
+            entity.x += resolved.x - entity_collider.x
+            entity.y += resolved.y - entity_collider.y
+            break
         }
 
         debug_draw_rect({entity_collider.x, entity_collider.y}, {entity_collider.width, entity_collider.height}, 1, rl.GREEN)
-        if resolved != {} {
-            debug_draw_rect({resolved.x, resolved.y}, {resolved.width, resolved.height}, 1, rl.RED)
-        }
     }
 }
