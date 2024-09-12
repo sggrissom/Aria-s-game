@@ -55,6 +55,12 @@ get_resolved_rect :: proc(dist: Vec2, static: Entity, resolved: ^Rect) -> Rect
 
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
+    //physics_update_by_centers(entities, static_colliders, dt)
+    physics_update_with_steps(entities, static_colliders, dt)
+}
+
+physics_update_by_centers :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
+{
     for &entity in entities {
         if .Removed in entity.flags do continue
 
@@ -85,5 +91,44 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
         }
 
         debug_draw_rect({entity_collider.x, entity_collider.y}, {entity_collider.width, entity_collider.height}, 1, rl.GREEN)
+    }
+}
+
+PHYSICS_ITERATIONS :: 8
+
+physics_update_with_steps :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
+{
+    for &entity in entities {
+        if .Removed in entity.flags do continue
+
+        for _ in 0 ..< PHYSICS_ITERATIONS {
+            step := dt / PHYSICS_ITERATIONS
+
+            entity.y += entity.input.y * entity.move_speed * step
+            for static in static_colliders {
+                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
+                    if entity.input.y > 0 {
+                        entity.y = static.y - entity.height
+                    } else {
+                        entity.y = static.y + static.height - entity.collider.y
+                    }
+                    entity.input.y = 0
+                    break
+                }
+            }
+
+            entity.x += entity.input.x * entity.move_speed * step
+            for static in static_colliders {
+                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
+                    if entity.input.x > 0 {
+                        entity.x = static.x - entity.width + entity.collider.x
+                    } else {
+                        entity.x = static.x + static.width - entity.collider.x
+                    }
+                    entity.input.x = 0
+                    break
+                }
+            }
+        }
     }
 }

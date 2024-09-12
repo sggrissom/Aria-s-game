@@ -10,9 +10,23 @@ Vec2 :: rl.Vector2
 Rect :: rl.Rectangle
 Entity_Id :: distinct int
 
-Direction :: enum {UP, DOWN, LEFT, RIGHT}
-Scene :: enum {MENU, GAME}
-EntityState :: enum {STILL, WALK, HOLD, EMPTY, FULL}
+Direction :: enum {
+	UP,
+	DOWN,
+	LEFT,
+	RIGHT,
+}
+Scene :: enum {
+	MENU,
+	GAME,
+}
+EntityState :: enum {
+	STILL,
+	WALK,
+	HOLD,
+	EMPTY,
+	FULL,
+}
 Entity_Flags :: enum {
 	Removed,
 	Debug_Draw,
@@ -30,208 +44,242 @@ playerHeight :: 48
 playerWidth :: 33
 
 Game_State :: struct {
-    window_size: Vec2,
-    cart_id: Entity_Id,
-    player_id: Entity_Id,
-    cam: rl.Camera2D,
-    entities: [dynamic]Entity,
-    solid_tiles: [dynamic]Entity,
-    debug_shapes: [dynamic]Debug_Shape,
+	window_size:  Vec2,
+	cart_id:      Entity_Id,
+	player_id:    Entity_Id,
+	cam:          rl.Camera2D,
+	entities:     [dynamic]Entity,
+	solid_tiles:  [dynamic]Entity,
+	debug_shapes: [dynamic]Debug_Shape,
 }
 
 Entity :: struct {
-    collider: Rect,
-    using position: Rect,
-    input: Vec2,
-    move_speed: f32,
-    animation: ^Animation,
-    state: EntityState,
-    direction: Direction,
-    holding: HeldEntity,
-    flags: bit_set[Entity_Flags],
+	collider:       Rect,
+	using position: Rect,
+	input:          Vec2,
+	move_speed:     f32,
+	animation:      ^Animation,
+	state:          EntityState,
+	direction:      Direction,
+	holding:        HeldEntity,
+	flags:          bit_set[Entity_Flags],
 }
 
 HeldEntity :: struct {
-    using item: ^Entity,
-    offset_map: map[Direction]Vec2,
+	using item: ^Entity,
+	offset_map: map[Direction]Vec2,
 }
 
 Sprite_Sheet :: struct {
-    texture: rl.Texture2D,
-    sheet_size: Vec2,
-    sprite_rows: int,
-    sprite_columns: int,
+	texture:        rl.Texture2D,
+	sheet_size:     Vec2,
+	sprite_rows:    int,
+	sprite_columns: int,
 }
 
 Animation :: struct {
-    sprite_sheet: ^Sprite_Sheet,
-    frames_per_second: int,
-    frames: [dynamic]int, 
+	sprite_sheet:      ^Sprite_Sheet,
+	frames_per_second: int,
+	frames:            [dynamic]int,
 }
 
 Map :: struct {
-    width: int,
-    height: int,
-    tiles: [dynamic]^Entity,
+	width:  int,
+	height: int,
+	tiles:  [dynamic]^Entity,
 }
 
 game_logic :: proc() {
-    player := entity_get(gs.player_id)
-    player.input = {}
-    player.state = .STILL
-    player.flags -= {.In_Motion}
+	player := entity_get(gs.player_id)
+	player.input = {}
+	player.state = .STILL
+	player.flags -= {.In_Motion}
 
-    cart := entity_get(gs.cart_id)
-    cart.input = {}
-    cart.state = .EMPTY
-    cart.flags -= {.In_Motion}
+	cart := entity_get(gs.cart_id)
+	cart.input = {}
+	cart.state = .EMPTY
+	cart.flags -= {.In_Motion}
 
-    if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
-        player.input.y = -1
-        player.direction = .UP
-        player.state = .WALK
-        player.flags += {.In_Motion}
-    }
-    if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
-        player.input.y = 1
-        player.direction = .DOWN
-        player.state = .WALK
-        player.flags += {.In_Motion}
-    }
-    if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
-        player.input.x = -1
-        player.direction = .LEFT
-        player.state = .WALK
-        player.flags += {.In_Motion}
-    }
-    if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
-        player.input.x = 1
-        player.direction = .RIGHT
-        player.state = .WALK
-        player.flags += {.In_Motion}
-    }
-    if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-        if (player.holding.item == nil) {
-            cart.flags += {.Removed}
-            if .In_Motion in player.flags {
-                cart.flags += {.In_Motion}
-            }
-            player.holding.item = cart
-            player.holding.offset_map = make(map[Direction]Vec2)
-            player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
-            player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
-            player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
-            player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
-        } else {
-            delete(player.holding.offset_map)
-            player.holding.flags -= {.Removed}
-            player.holding.item = nil
-        }
-    }
+	if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
+		player.input.y = -1
+		player.direction = .UP
+		player.state = .WALK
+		player.flags += {.In_Motion}
+	}
+	if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
+		player.input.y = 1
+		player.direction = .DOWN
+		player.state = .WALK
+		player.flags += {.In_Motion}
+	}
+	if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
+		player.input.x = -1
+		player.direction = .LEFT
+		player.state = .WALK
+		player.flags += {.In_Motion}
+	}
+	if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
+		player.input.x = 1
+		player.direction = .RIGHT
+		player.state = .WALK
+		player.flags += {.In_Motion}
+	}
+	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
+		if (player.holding.item == nil) {
+			cart.flags += {.Removed}
+			if .In_Motion in player.flags {
+				cart.flags += {.In_Motion}
+			}
+			player.holding.item = cart
+			player.holding.offset_map = make(map[Direction]Vec2)
+			player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
+			player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
+			player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
+			player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+		} else {
+			delete(player.holding.offset_map)
+			player.holding.flags -= {.Removed}
+			player.holding.item = nil
+		}
+	}
 
 
-    dt := rl.GetFrameTime()
-    physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+	dt := rl.GetFrameTime()
+	physics_update(gs.entities[:], gs.solid_tiles[:], dt)
 
-    CART_OFFSET :: 22
-    if (player.holding.item != nil) {
-        player.state = .HOLD
-        player.holding.x = player.x
-        player.holding.y = player.y
-        player.holding.direction = player.direction
-        player.holding.x += player.holding.offset_map[player.direction].x
-        player.holding.y += player.holding.offset_map[player.direction].y
-        switch player.holding.direction {
-            case .UP: 
-            player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = 0, width = colliderWidth, height = colliderHeight,}
-            break
-            case .DOWN:
-            player.holding.collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,}
-            break
-            case .LEFT:
-            player.holding.collider = {x = 0, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
-            break
-            case .RIGHT:
-            player.holding.collider = {x = tileWidth - colliderHeight, y = (tileWidth - colliderWidth)/2, width = colliderHeight, height = colliderWidth,}
-            break
-        }
-    }
-    
-    gs.cam.target = { player.x - player.width / 2, player.y - player.height / 2};
+	CART_OFFSET :: 22
+	if (player.holding.item != nil) {
+		player.state = .HOLD
+		player.holding.x = player.x
+		player.holding.y = player.y
+		player.holding.direction = player.direction
+		player.holding.x += player.holding.offset_map[player.direction].x
+		player.holding.y += player.holding.offset_map[player.direction].y
+		switch player.holding.direction {
+		case .UP:
+			player.holding.collider = {
+				x      = (tileWidth - colliderWidth) / 2,
+				y      = 0,
+				width  = colliderWidth,
+				height = colliderHeight,
+			}
+			break
+		case .DOWN:
+			player.holding.collider = {
+				x      = (tileWidth - colliderWidth) / 2,
+				y      = tileWidth - colliderHeight,
+				width  = colliderWidth,
+				height = colliderHeight,
+			}
+			break
+		case .LEFT:
+			player.holding.collider = {
+				x      = 0,
+				y      = (tileWidth - colliderWidth) / 2,
+				width  = colliderHeight,
+				height = colliderWidth,
+			}
+			break
+		case .RIGHT:
+			player.holding.collider = {
+				x      = tileWidth - colliderHeight,
+				y      = (tileWidth - colliderWidth) / 2,
+				width  = colliderHeight,
+				height = colliderWidth,
+			}
+			break
+		}
+	}
+
+	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
 }
 
 main :: proc() {
-    gs = Game_State {
-        window_size = {1280, 720}
-    }
-    gs.cart_id = entity_create( {
-        position = {x = 100, y = 100, width = tileWidth, height = tileWidth,},
-        collider = {x = (tileWidth - colliderWidth)/2, y = tileWidth - colliderHeight, width = colliderWidth, height = colliderHeight,},
-        direction = Direction.RIGHT,
-        move_speed = 300,
-    })
-    gs.player_id = entity_create( {
-        position = {x = 200, y = 200, width = playerWidth, height = playerHeight,},
-        collider = {x = (playerWidth - colliderWidth)/2, y = playerHeight - colliderHeight, width = colliderWidth, height = colliderHeight,},
-        direction = Direction.RIGHT,
-        move_speed = 300,
-    })
-    gs.cam = {
-        offset = { gs.window_size.x / 2, gs.window_size.y / 2},
-        zoom = ZOOM
-    }
+	gs = Game_State {
+		window_size = {1280, 720},
+	}
+	gs.cart_id = entity_create(
+		{
+			position = {x = 100, y = 100, width = tileWidth, height = tileWidth},
+			collider = {
+				x = (tileWidth - colliderWidth) / 2,
+				y = tileWidth - colliderHeight,
+				width = colliderWidth,
+				height = colliderHeight,
+			},
+			direction = Direction.RIGHT,
+			move_speed = 200,
+		},
+	)
+	gs.player_id = entity_create(
+		{
+			position = {x = 200, y = 200, width = playerWidth, height = playerHeight},
+			collider = {
+				x = (playerWidth - colliderWidth) / 2,
+				y = playerHeight - colliderHeight,
+				width = colliderWidth,
+				height = colliderHeight,
+			},
+			direction = Direction.RIGHT,
+			move_speed = 200,
+		},
+	)
+	gs.cam = {
+		offset = {gs.window_size.x / 2, gs.window_size.y / 2},
+		zoom   = ZOOM,
+	}
 
-    rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
-    rl.SetTargetFPS(60)
+	rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
+	rl.SetTargetFPS(60)
 
-    food_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/FOOD.png"),
-        sheet_size = {64, 1632},
-        sprite_rows = 51,
-        sprite_columns = 2,
-    }
-    store_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/STORE.png"),
-        sheet_size = {48, 80},
-        sprite_rows = 2,
-        sprite_columns = 1,
-    }
-    walls_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/WALLS-2.png"),
-        sheet_size = {384, 288},
-        sprite_rows = 6,
-        sprite_columns = 8,
-    }
-    cart_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/CART.png"),
-        sheet_size = {288, 768},
-        sprite_rows = 8,
-        sprite_columns = 3,
-    }
-    player_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/char.png"),
-        sheet_size = {192, 70},
-        sprite_rows = 1,
-        sprite_columns = 4,
-    }
-    player_walk_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/char_walk.png"),
-        sheet_size = {1152, 78},
-        sprite_rows = 1,
-        sprite_columns = 24,
-    }    
-    player_push_sheet = Sprite_Sheet {
-        texture = rl.LoadTexture("resources/char_push.png"),
-        sheet_size = {1156, 80},
-        sprite_rows = 1,
-        sprite_columns = 24,
-    }
+	food_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/FOOD.png"),
+		sheet_size     = {64, 1632},
+		sprite_rows    = 51,
+		sprite_columns = 2,
+	}
+	store_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/STORE.png"),
+		sheet_size     = {48, 80},
+		sprite_rows    = 2,
+		sprite_columns = 1,
+	}
+	walls_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/WALLS-2.png"),
+		sheet_size     = {384, 288},
+		sprite_rows    = 6,
+		sprite_columns = 8,
+	}
+	cart_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/CART.png"),
+		sheet_size     = {288, 768},
+		sprite_rows    = 8,
+		sprite_columns = 3,
+	}
+	player_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/char.png"),
+		sheet_size     = {192, 70},
+		sprite_rows    = 1,
+		sprite_columns = 4,
+	}
+	player_walk_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/char_walk.png"),
+		sheet_size     = {1152, 78},
+		sprite_rows    = 1,
+		sprite_columns = 24,
+	}
+	player_push_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/char_push.png"),
+		sheet_size     = {1156, 80},
+		sprite_rows    = 1,
+		sprite_columns = 24,
+	}
 
-    read_map("resources/wall.map")
-    init_player_animations()
+	read_map("resources/wall.map")
+	init_player_animations()
 
-    for !rl.WindowShouldClose() {
-        game_logic()
-        render_frame()
-    }
+	for !rl.WindowShouldClose() {
+		game_logic()
+		render_frame()
+	}
 }
