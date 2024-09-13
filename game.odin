@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:math"
 import "core:math/linalg"
 import "core:math/rand"
+import "core:time"
 import rl "vendor:raylib"
 
 Vec2 :: rl.Vector2
