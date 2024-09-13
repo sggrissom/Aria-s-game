@@ -12,7 +12,7 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
 
     sourceRec : rl.Rectangle = { sprite_width * f32(sprite_column), (sprite_height * f32(sprite_row)), sprite_width, sprite_height };
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
-    rl.DrawRectangleLinesEx(dest, 0.5, rl.WHITE)
+    //rl.DrawRectangleLinesEx(dest, 0.5, rl.WHITE)
 }
 
 render_entity :: proc(entity: ^Entity) {
@@ -32,7 +32,7 @@ render_entity :: proc(entity: ^Entity) {
 render_map :: proc() {
     for &tile in gs.solid_tiles {
         render_entity(&tile)
-        rl.DrawRectangleLinesEx(tile, 0.5, rl.RED)
+        //rl.DrawRectangleLinesEx(tile, 0.5, rl.RED)
     }
 }
 
@@ -76,8 +76,6 @@ render_frame :: proc() {
     rl.EndMode2D()
 
     rl.DrawFPS(10, 10)
-    rl.DrawText(rl.TextFormat("(%02.02f, %02.02f)", player.x, player.y), 10, 40, 20, rl.BLUE)
-    rl.DrawText(rl.TextFormat("(%s)", player.state), 10, 80, 20, rl.BLUE)
     rl.EndDrawing()
 
     clear(&gs.debug_shapes)
