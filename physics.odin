@@ -28,7 +28,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                 if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
                     if entity.input.y > 0 {
                         //DOWN
-                        entity.y = static.y - entity.height
+                        entity.y = static.y - entity.combined_collider.height - entity.combined_collider.y
                     } else {
                         //UP
                         entity.y = static.y + static.height - entity.combined_collider.y
@@ -43,7 +43,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                 if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
                     if entity.input.x > 0 {
                         //RIGHT
-                        entity.x = static.x - entity.width + entity.combined_collider.x
+                        entity.x = static.x - entity.combined_collider.width - entity.combined_collider.x
                     } else {
                         //LEFT
                         entity.x = static.x + static.width - entity.combined_collider.x

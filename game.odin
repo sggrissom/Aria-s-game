@@ -190,6 +190,7 @@ game_logic :: proc() {
 			}
 			break
 		}
+		player.holding.combined_collider = player.holding.collider
 	}
 
 	player.combined_collider = player.collider
