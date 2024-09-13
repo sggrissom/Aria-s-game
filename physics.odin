@@ -7,7 +7,7 @@ import "core:math"
 import rl "vendor:raylib"
 
 get_static_collider :: proc(entity: Entity) -> Rect {
-    checkRect := entity.collider
+    checkRect := entity.combined_collider
     checkRect.x += entity.x
     checkRect.y += entity.y
     return checkRect
@@ -31,7 +31,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                         entity.y = static.y - entity.height
                     } else {
                         //UP
-                        entity.y = static.y + static.height - entity.collider.y
+                        entity.y = static.y + static.height - entity.combined_collider.y
                     }
                     entity.input.y = 0
                     break
@@ -43,10 +43,10 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                 if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
                     if entity.input.x > 0 {
                         //RIGHT
-                        entity.x = static.x - entity.width + entity.collider.x
+                        entity.x = static.x - entity.width + entity.combined_collider.x
                     } else {
                         //LEFT
-                        entity.x = static.x + static.width - entity.collider.x
+                        entity.x = static.x + static.width - entity.combined_collider.x
                     }
                     entity.input.x = 0
                     break

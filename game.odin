@@ -54,15 +54,16 @@ Game_State :: struct {
 }
 
 Entity :: struct {
-	collider:       Rect,
-	using position: Rect,
-	input:          Vec2,
-	move_speed:     f32,
-	animation:      ^Animation,
-	state:          EntityState,
-	direction:      Direction,
-	holding:        HeldEntity,
-	flags:          bit_set[Entity_Flags],
+	collider:          Rect,
+	combined_collider: Rect,
+	using position:    Rect,
+	input:             Vec2,
+	move_speed:        f32,
+	animation:         ^Animation,
+	state:             EntityState,
+	direction:         Direction,
+	holding:           HeldEntity,
+	flags:             bit_set[Entity_Flags],
 }
 
 HeldEntity :: struct {
@@ -99,6 +100,8 @@ game_logic :: proc() {
 	cart.input = {}
 	cart.state = .EMPTY
 	cart.flags -= {.In_Motion}
+
+	player.combined_collider = player.collider
 
 	if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
 		player.input.y = -1
@@ -145,9 +148,7 @@ game_logic :: proc() {
 
 
 	dt := rl.GetFrameTime()
-	physics_update(gs.entities[:], gs.solid_tiles[:], dt)
-
-	CART_OFFSET :: 22
+	
 	if (player.holding.item != nil) {
 		player.state = .HOLD
 		player.holding.x = player.x
@@ -191,7 +192,44 @@ game_logic :: proc() {
 		}
 	}
 
+	player.combined_collider = player.collider
+	combine_rects(player)
+	physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+
+	CART_OFFSET :: 22
+	if (player.holding.item != nil) {
+		player.state = .HOLD
+		player.holding.x = player.x
+		player.holding.y = player.y
+		player.holding.direction = player.direction
+		player.holding.x += player.holding.offset_map[player.direction].x
+		player.holding.y += player.holding.offset_map[player.direction].y
+	}
+
 	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
+}
+
+combine_rects :: proc(entity: ^Entity) {
+	if entity.holding.item == nil {
+		return
+	}
+
+	checkRect := entity.collider
+	checkRect.x += entity.x
+	checkRect.y += entity.y
+
+	heldRect := get_static_collider(entity.holding.item^)
+
+	new_x := math.min(checkRect.x, heldRect.x)
+	new_y := math.min(checkRect.y, heldRect.y)
+
+	new_width := math.max(checkRect.x + checkRect.width, heldRect.x + heldRect.width) - new_x
+	new_height := math.max(checkRect.y + checkRect.height, heldRect.y + heldRect.height) - new_y
+
+	entity.combined_collider.x = new_x - entity.x
+	entity.combined_collider.y = new_y - entity.y
+	entity.combined_collider.width = new_width
+	entity.combined_collider.height = new_height
 }
 
 main :: proc() {

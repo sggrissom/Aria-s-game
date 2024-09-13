@@ -32,6 +32,7 @@ read_map :: proc(filepath: string) {
             tile.collider.y = 0
             tile.collider.width = tileWidth
             tile.collider.height = tileWidth
+            tile.combined_collider = tile.collider
             tile.animation = get_wall_animation(frame)
 
             solid_tile_create(tile)
