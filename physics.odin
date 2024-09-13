@@ -4,6 +4,7 @@ import "core:strconv"
 import "core:strings"
 import "core:os"
 import "core:math"
+import "core:time"
 import rl "vendor:raylib"
 
 get_static_collider :: proc(entity: Entity) -> Rect {
@@ -17,7 +18,8 @@ PHYSICS_ITERATIONS :: 8
 
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
-    for &entity in entities {
+    for &entity, e_id in entities {
+        entity_id := Entity_Id(e_id)
         if .Removed in entity.flags do continue
 
         for _ in 0 ..< PHYSICS_ITERATIONS {
@@ -54,7 +56,29 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
             }
         }
 
-        debug_draw_rect(entity.position, 1, rl.WHITE)
-        debug_draw_rect(get_static_collider(entity), 1, rl.GREEN)
+        for &other, o_id in entities {
+			other_id := Entity_Id(o_id)
+			if entity_id == other_id do continue
+
+			if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(other)) {
+				if entity_id not_in other.entity_ids {
+					other.entity_ids[entity_id] = time.now()
+
+					if other.on_enter != nil {
+						other.on_enter(other_id, entity_id)
+					}
+				} else {
+					if other.on_stay != nil {
+						other.on_stay(other_id, entity_id)
+					}
+				}
+			} else if entity_id in other.entity_ids {
+				if other.on_exit != nil {
+					other.on_exit(other_id, entity_id)
+				}
+				delete_key(&other.entity_ids, entity_id)
+			}
+		}
+
     }
 }

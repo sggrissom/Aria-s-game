@@ -64,6 +64,8 @@ Entity :: struct {
 	direction:         Direction,
 	holding:           HeldEntity,
 	flags:             bit_set[Entity_Flags],
+	on_enter, on_stay, on_exit: proc(self_id, other_id: Entity_Id),
+	entity_ids:                 map[Entity_Id]time.Time,
 }
 
 HeldEntity :: struct {
