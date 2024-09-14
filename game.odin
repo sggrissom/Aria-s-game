@@ -55,16 +55,16 @@ Game_State :: struct {
 }
 
 Entity :: struct {
-	collider:          Rect,
-	combined_collider: Rect,
-	using position:    Rect,
-	input:             Vec2,
-	move_speed:        f32,
-	animation:         ^Animation,
-	state:             EntityState,
-	direction:         Direction,
-	holding:           HeldEntity,
-	flags:             bit_set[Entity_Flags],
+	collider:                   Rect,
+	combined_collider:          Rect,
+	using position:             Rect,
+	input:                      Vec2,
+	move_speed:                 f32,
+	animation:                  ^Animation,
+	state:                      EntityState,
+	direction:                  Direction,
+	holding:                    HeldEntity,
+	flags:                      bit_set[Entity_Flags],
 	on_enter, on_stay, on_exit: proc(self_id, other_id: Entity_Id),
 	entity_ids:                 map[Entity_Id]time.Time,
 }
@@ -131,18 +131,24 @@ game_logic :: proc() {
 		player.flags += {.In_Motion}
 	}
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-		if (player.holding.item == nil) {
-			cart.flags += {.Removed}
-			if .In_Motion in player.flags {
-				cart.flags += {.In_Motion}
+		if player.holding.item == nil && len(player.entity_ids) > 0 {
+			for key in player.entity_ids {
+				item := entity_get(key)
+				item.flags += {.Removed}
+				if .In_Motion in player.flags {
+					item.flags += {.In_Motion}
+				}
+				player.holding.item = item
+				player.holding.offset_map = make(map[Direction]Vec2)
+				player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
+				player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
+				player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
+				player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+				break
 			}
-			player.holding.item = cart
-			player.holding.offset_map = make(map[Direction]Vec2)
-			player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
-			player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
-			player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
-			player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
-		} else {
+		}
+
+		if player.holding.item != nil {
 			delete(player.holding.offset_map)
 			player.holding.flags -= {.Removed}
 			player.holding.item = nil
@@ -150,7 +156,7 @@ game_logic :: proc() {
 	}
 
 	dt := rl.GetFrameTime()
-	
+
 	if (player.holding.item != nil) {
 		player.state = .HOLD
 		player.holding.x = player.x
@@ -241,7 +247,7 @@ main :: proc() {
 	}
 	gs.cart_id = entity_create(
 		{
-			position = {x = 100, y = 100, width = tileWidth, height = tileWidth},
+			position = {x = 150, y = 150, width = tileWidth, height = tileWidth},
 			collider = {
 				x = (tileWidth - colliderWidth) / 2,
 				y = tileWidth - colliderHeight,
