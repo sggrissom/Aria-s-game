@@ -15,6 +15,9 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
 }
 
 render_entity :: proc(entity: ^Entity) {
+    if .Cart in entity.flags {
+        entity.animation = cart_animations_map[{entity.direction, entity.state}]
+    }
     if (entity.animation == nil) {
         return
     }
@@ -43,8 +46,8 @@ render_frame :: proc() {
     player.animation = player_animations_map[{player.direction, player.state}]
     
     render_map()
-    for entity in gs.entities {
-        render_entity(entity)
+    for &entity in gs.entities {
+        render_entity(&entity)
     }
     
     for s in gs.debug_shapes {

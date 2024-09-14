@@ -32,6 +32,7 @@ Entity_Flags :: enum {
 	Removed,
 	Debug_Draw,
 	In_Motion,
+	Cart,
 }
 
 WINDOW_WIDTH :: 1280
