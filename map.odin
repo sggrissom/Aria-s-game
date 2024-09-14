@@ -33,8 +33,16 @@ read_map :: proc(filepath: string) {
 						width = colliderWidth,
 						height = colliderHeight,
 					},
+					combined_collider = {
+						x = (tileWidth - colliderWidth) / 2,
+						y = tileWidth - colliderHeight,
+						width = colliderWidth,
+						height = colliderHeight,
+					},
 					direction = Direction.RIGHT,
 					move_speed = 200,
+					flags = {.Cart},
+					state = .EMPTY
 				},
 			)
 			continue
