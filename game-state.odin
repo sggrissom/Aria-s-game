@@ -2,7 +2,6 @@ package main
 
 gs : Game_State
 
-food_sheet : Sprite_Sheet
 cart_sheet : Sprite_Sheet
 store_sheet : Sprite_Sheet
 walls_sheet : Sprite_Sheet

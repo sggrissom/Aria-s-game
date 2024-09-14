@@ -149,7 +149,6 @@ game_logic :: proc() {
 		}
 	}
 
-
 	dt := rl.GetFrameTime()
 	
 	if (player.holding.item != nil) {
@@ -274,12 +273,6 @@ main :: proc() {
 	rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
 	rl.SetTargetFPS(60)
 
-	food_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/FOOD.png"),
-		sheet_size     = {64, 1632},
-		sprite_rows    = 51,
-		sprite_columns = 2,
-	}
 	store_sheet = Sprite_Sheet {
 		texture        = rl.LoadTexture("resources/STORE.png"),
 		sheet_size     = {48, 80},
