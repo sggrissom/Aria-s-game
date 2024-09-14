@@ -46,7 +46,6 @@ playerWidth :: 33
 
 Game_State :: struct {
 	window_size:  Vec2,
-	cart_id:      Entity_Id,
 	player_id:    Entity_Id,
 	cam:          rl.Camera2D,
 	entities:     [dynamic]Entity,
@@ -98,11 +97,6 @@ game_logic :: proc() {
 	player.input = {}
 	player.state = .STILL
 	player.flags -= {.In_Motion}
-
-	cart := entity_get(gs.cart_id)
-	cart.input = {}
-	cart.state = .EMPTY
-	cart.flags -= {.In_Motion}
 
 	player.combined_collider = player.collider
 
@@ -245,19 +239,6 @@ main :: proc() {
 	gs = Game_State {
 		window_size = {1280, 720},
 	}
-	gs.cart_id = entity_create(
-		{
-			position = {x = 150, y = 150, width = tileWidth, height = tileWidth},
-			collider = {
-				x = (tileWidth - colliderWidth) / 2,
-				y = tileWidth - colliderHeight,
-				width = colliderWidth,
-				height = colliderHeight,
-			},
-			direction = Direction.RIGHT,
-			move_speed = 200,
-		},
-	)
 	gs.player_id = entity_create(
 		{
 			position = {x = 200, y = 200, width = playerWidth, height = playerHeight},

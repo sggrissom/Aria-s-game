@@ -20,6 +20,25 @@ read_map :: proc(filepath: string) {
     tile_count :int = int(map_width * map_height)
 
     for token, i in file_tokens[2:] {
+        x := tileWidth * f32(i % map_width)
+        y := tileWidth * f32(i / map_width)
+    
+        if token == "c" {
+           entity_create(
+		{
+			position = {x = x, y = x, width = tileWidth, height = tileWidth},
+			collider = {
+				x = (tileWidth - colliderWidth) / 2,
+				y = tileWidth - colliderHeight,
+				width = colliderWidth,
+				height = colliderHeight,
+			},
+			direction = Direction.RIGHT,
+			move_speed = 200,
+		},)
+		break		
+        }
+        
         frame, ok := strconv.parse_int(token)
         if (ok && frame > 0) {
 

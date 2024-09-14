@@ -38,20 +38,13 @@ render_frame :: proc() {
     rl.BeginMode2D(gs.cam)
 
     animation :^Animation
-
-    cart := entity_get(gs.cart_id)
-    cart.animation = cart_animations_map[{cart.direction, cart.state}]
     
     player := entity_get(gs.player_id)
     player.animation = player_animations_map[{player.direction, player.state}]
     
     render_map()
-    if (player.y < cart.y) {
-        render_entity(player)
-        render_entity(cart)
-    } else {
-        render_entity(cart)
-        render_entity(player)
+    for entity in gs.entities {
+        render_entity(entity)
     }
     
     for s in gs.debug_shapes {
