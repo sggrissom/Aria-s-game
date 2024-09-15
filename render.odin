@@ -46,8 +46,25 @@ render_frame :: proc() {
     player.animation = player_animations_map[{player.direction, player.state}]
     
     render_map()
-    for &entity in gs.entities {
-        render_entity(&entity)
+
+    entities_to_render: []^Entity = make([]^Entity, len(gs.entities), context.temp_allocator)
+    for i in 0..<len(gs.entities) {
+        entities_to_render[i] = &gs.entities[i]
+    }
+    
+    // sort by y
+    for i in 1..<len(entities_to_render) {
+        current := entities_to_render[i]
+        j := i - 1
+        for j >= 0 && entities_to_render[j].position.y > current.position.y {
+            entities_to_render[j + 1] = entities_to_render[j]
+            j -= 1
+        }
+        entities_to_render[j + 1] = current
+    }
+    
+    for entity in entities_to_render {
+        render_entity(entity)
     }
     
     for s in gs.debug_shapes {
