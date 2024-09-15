@@ -203,19 +203,6 @@ main :: proc() {
 	gs = Game_State {
 		window_size = {1280, 720},
 	}
-	gs.player_id = entity_create(
-		{
-			position = {x = 200, y = 200, width = playerWidth, height = playerHeight},
-			collider = {
-				x = (playerWidth - colliderWidth) / 2,
-				y = playerHeight - colliderHeight,
-				width = colliderWidth,
-				height = colliderHeight,
-			},
-			direction = Direction.RIGHT,
-			move_speed = 200,
-		},
-	)
 	gs.cam = {
 		offset = {gs.window_size.x / 2, gs.window_size.y / 2},
 		zoom   = ZOOM,

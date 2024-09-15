@@ -56,6 +56,8 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
             }
         }
 
+        //debug_draw_rect(get_static_collider(entity), 1, rl.RED)
+
         for &other, o_id in entities {
 			other_id := Entity_Id(o_id)
 			if entity_id == other_id do continue

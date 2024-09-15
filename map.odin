@@ -27,12 +27,28 @@ read_map :: proc(filepath: string) {
 			entity_create(
 				{
 					position = {x = x, y = x, width = tileWidth, height = tileWidth},
-					collider = {x = 0, y = 0, width = tileWidth, height = tileWidth},
-					combined_collider = {x = 0, y = 0, width = tileWidth, height = tileWidth},
+					collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
+					combined_collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
 					direction = Direction.RIGHT,
 					move_speed = 200,
 					flags = {.Cart},
 					state = .EMPTY
+				},
+			)
+			continue
+		}
+		if token == "pl" {
+			gs.player_id = entity_create(
+				{
+					position = {x = x, y = y, width = playerWidth, height = playerHeight},
+					collider = {
+						x = (playerWidth - colliderWidth) / 2,
+						y = playerHeight - colliderHeight,
+						width = colliderWidth,
+						height = colliderHeight,
+					},
+					direction = Direction.RIGHT,
+					move_speed = 200,
 				},
 			)
 			continue
