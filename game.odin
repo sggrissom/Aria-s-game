@@ -126,7 +126,7 @@ game_logic :: proc() {
 		player.flags += {.In_Motion}
 	}
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
-		if player.holding.item == nil && len(player.entity_ids) > 0 {
+		if player.holding.item == nil {
 			for key in player.entity_ids {
 				item := entity_get(key)
 				item.flags += {.Removed}
@@ -141,9 +141,7 @@ game_logic :: proc() {
 				player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
 				break
 			}
-		}
-
-		if player.holding.item != nil {
+		} else {
 			delete(player.holding.offset_map)
 			player.holding.flags -= {.Removed}
 			player.holding.item = nil

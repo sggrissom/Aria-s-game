@@ -68,6 +68,11 @@ render_frame :: proc() {
     rl.EndMode2D()
 
     rl.DrawFPS(10, 10)
+    y_line := 30
+    for id in player.entity_ids {
+        rl.DrawText(rl.TextFormat("touching id: %02i", int(id)), 10, i32(y_line), 10, rl.WHITE)
+        y_line += 20
+    }
     rl.EndDrawing()
 
     clear(&gs.debug_shapes)
