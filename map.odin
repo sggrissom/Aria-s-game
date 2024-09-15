@@ -27,18 +27,8 @@ read_map :: proc(filepath: string) {
 			entity_create(
 				{
 					position = {x = x, y = x, width = tileWidth, height = tileWidth},
-					collider = {
-						x = (tileWidth - colliderWidth) / 2,
-						y = tileWidth - colliderHeight,
-						width = colliderWidth,
-						height = colliderHeight,
-					},
-					combined_collider = {
-						x = (tileWidth - colliderWidth) / 2,
-						y = tileWidth - colliderHeight,
-						width = colliderWidth,
-						height = colliderHeight,
-					},
+					collider = {x = 0, y = 0, width = tileWidth, height = tileWidth},
+					combined_collider = {x = 0, y = 0, width = tileWidth, height = tileWidth},
 					direction = Direction.RIGHT,
 					move_speed = 200,
 					flags = {.Cart},

@@ -157,41 +157,6 @@ game_logic :: proc() {
 		player.holding.direction = player.direction
 		player.holding.x += player.holding.offset_map[player.direction].x
 		player.holding.y += player.holding.offset_map[player.direction].y
-		switch player.holding.direction {
-		case .UP:
-			player.holding.collider = {
-				x      = (tileWidth - colliderWidth) / 2,
-				y      = 0,
-				width  = colliderWidth,
-				height = colliderHeight,
-			}
-			break
-		case .DOWN:
-			player.holding.collider = {
-				x      = (tileWidth - colliderWidth) / 2,
-				y      = tileWidth - colliderHeight,
-				width  = colliderWidth,
-				height = colliderHeight,
-			}
-			break
-		case .LEFT:
-			player.holding.collider = {
-				x      = 0,
-				y      = (tileWidth - colliderWidth) / 2,
-				width  = colliderHeight,
-				height = colliderWidth,
-			}
-			break
-		case .RIGHT:
-			player.holding.collider = {
-				x      = tileWidth - colliderHeight,
-				y      = (tileWidth - colliderWidth) / 2,
-				width  = colliderHeight,
-				height = colliderWidth,
-			}
-			break
-		}
-		player.holding.combined_collider = player.holding.collider
 	}
 
 	player.combined_collider = player.collider
