@@ -1,3 +1,4 @@
+#+feature dynamic-literals
 package main
 
 import rl "vendor:raylib"
@@ -24,6 +25,9 @@ render_entity :: proc(entity: ^Entity) {
     frameIndex := 0
     if (.In_Motion in entity.flags && len(entity.animation.frames) > 1) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
+    }
+    if (.Debug_Draw in entity.flags) {
+        rl.DrawRectangleLinesEx(entity.position, 1, rl.RED);
     }
     assert(frameIndex < len(entity.animation.frames))
     render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)

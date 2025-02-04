@@ -1,3 +1,4 @@
+#+feature dynamic-literals
 package main
 
 import "core:os"
@@ -31,7 +32,7 @@ read_map :: proc(filepath: string) {
 					combined_collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
 					direction = Direction.RIGHT,
 					move_speed = 200,
-					flags = {.Cart},
+					flags = {.Cart, .Debug_Draw},
 					state = .EMPTY
 				},
 			)
@@ -49,6 +50,7 @@ read_map :: proc(filepath: string) {
 					},
 					direction = Direction.RIGHT,
 					move_speed = 200,
+					flags = {.Debug_Draw},
 				},
 			)
 			continue

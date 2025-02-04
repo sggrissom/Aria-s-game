@@ -1,3 +1,4 @@
+#+feature dynamic-literals
 package main
 
 gs : Game_State
