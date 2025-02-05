@@ -102,6 +102,7 @@ game_logic :: proc() {
 
 	player.combined_collider = player.collider
 
+	currentDirection :=  player.direction
 	if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
 		player.input.y = -1
 		player.direction = .UP
@@ -145,6 +146,7 @@ game_logic :: proc() {
 		} else {
 			delete(player.holding.offset_map)
 			player.holding.flags -= {.Removed}
+			player.holding.flags -= {.In_Motion}
 			player.holding.item = nil
 		}
 	}
@@ -162,10 +164,10 @@ game_logic :: proc() {
 		case .UP:
 		case .DOWN:
 		   player.holding.collider.width = colliderWidth
-		   player.holding.collider.height = tileWidth
+		   player.holding.collider.height = colliderHeight
 		case .LEFT:
 		case .RIGHT:
-		   player.holding.collider.width = tileWidth
+		   player.holding.collider.width = colliderHeight
 		   player.holding.collider.height = colliderWidth
 		}
 		player.holding.combined_collider = player.holding.collider
@@ -173,7 +175,33 @@ game_logic :: proc() {
 
 	player.combined_collider = player.collider
 	combine_rects(player)
-	physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+
+	if (player.direction != currentDirection && !can_direction_change(player, gs.solid_tiles[:], dt)) {
+		player.input = {}
+		player.direction = currentDirection
+		player.state = .STILL
+		player.flags -= {.In_Motion}
+		if (player.holding.item != nil) {
+			player.state = .HOLD
+			player.holding.direction = player.direction
+			player.holding.x += player.holding.offset_map[player.direction].x
+			player.holding.y += player.holding.offset_map[player.direction].y
+			switch player.holding.direction {
+			case .UP:
+			case .DOWN:
+			player.holding.collider.width = colliderWidth
+			player.holding.collider.height = colliderHeight
+			case .LEFT:
+			case .RIGHT:
+			player.holding.collider.width = colliderHeight
+			player.holding.collider.height = colliderWidth
+			}
+			player.holding.combined_collider = player.holding.collider
+			combine_rects(player)
+		}
+	} else {
+		physics_update(gs.entities[:], gs.solid_tiles[:], dt)
+	}
 
 	CART_OFFSET :: 22
 	if (player.holding.item != nil) {

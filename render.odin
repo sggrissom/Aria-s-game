@@ -27,7 +27,7 @@ render_entity :: proc(entity: ^Entity) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
     if (.Debug_Draw in entity.flags) {
-        rl.DrawRectangleLinesEx(entity.position, 1, rl.RED);
+        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN);
     }
     assert(frameIndex < len(entity.animation.frames))
     render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)

@@ -17,6 +17,25 @@ get_static_collider :: proc(entity: Entity) -> Rect {
 
 PHYSICS_ITERATIONS :: 8
 
+can_direction_change :: proc(entity: ^Entity, static_colliders: []Entity, dt: f32) -> bool {
+    prevY := entity.y
+    prevX := entity.x
+    entity.y += entity.input.y * entity.move_speed * dt
+    entity.x += entity.input.x * entity.move_speed * dt
+
+    for static in static_colliders {
+        if rl.CheckCollisionRecs(get_static_collider(entity^), get_static_collider(static)) {
+            entity.x = prevX
+            entity.y = prevY
+            return false
+        }
+    }
+
+    entity.x = prevX
+    entity.y = prevY
+    return true
+}
+
 physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 {
     for &entity, e_id in entities {
@@ -56,8 +75,6 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
                 }
             }
         }
-
-        //debug_draw_rect(get_static_collider(entity), 1, rl.RED)
 
         for &other, o_id in entities {
 			other_id := Entity_Id(o_id)
