@@ -7,6 +7,50 @@ import "core:math/rand"
 import "core:time"
 import rl "vendor:raylib"
 
+try_pick_up_entity :: proc(player: ^Entity) {
+    for key in player.entity_ids {
+        item := entity_get(key)
+        item.flags += {.Removed}
+        if .In_Motion in player.flags {
+            item.flags += {.In_Motion}
+        }
+        player.holding.item = item
+        player.holding.offset_map = make(map[Direction]Vec2)
+        player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
+        player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
+        player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
+        player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+        break
+    }
+}
+
+drop_entity :: proc(player: ^Entity) {
+    delete(player.holding.offset_map)
+    player.holding.flags -= {.Removed}
+    player.holding.flags -= {.In_Motion}
+    player.holding.item = nil
+}
+
+held_item_update :: proc(player: ^Entity) {
+    player.state = .HOLD
+    player.holding.x = player.x
+    player.holding.y = player.y
+    player.holding.direction = player.direction
+    player.holding.x += player.holding.offset_map[player.direction].x
+    player.holding.y += player.holding.offset_map[player.direction].y
+    switch player.holding.direction {
+    case .UP:
+    case .DOWN:
+        player.holding.collider.width = colliderWidth
+        player.holding.collider.height = colliderHeight
+    case .LEFT:
+    case .RIGHT:
+        player.holding.collider.width = colliderHeight
+        player.holding.collider.height = colliderWidth
+    }
+    player.holding.combined_collider = player.holding.collider
+}
+
 player_update :: proc(dt: f32) {
 	player := entity_get(gs.player_id)
 	player.input = {}
@@ -42,50 +86,18 @@ player_update :: proc(dt: f32) {
 	}
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
 		if player.holding.item == nil {
-			for key in player.entity_ids {
-				item := entity_get(key)
-				item.flags += {.Removed}
-				if .In_Motion in player.flags {
-					item.flags += {.In_Motion}
-				}
-				player.holding.item = item
-				player.holding.offset_map = make(map[Direction]Vec2)
-				player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
-				player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
-				player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
-				player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
-				break
-			}
+            try_pick_up_entity(player)
 		} else {
-			delete(player.holding.offset_map)
-			player.holding.flags -= {.Removed}
-			player.holding.flags -= {.In_Motion}
-			player.holding.item = nil
+            drop_entity(player)
 		}
-	}
-
-	if (player.holding.item != nil) {
-		player.state = .HOLD
-		player.holding.x = player.x
-		player.holding.y = player.y
-		player.holding.direction = player.direction
-		player.holding.x += player.holding.offset_map[player.direction].x
-		player.holding.y += player.holding.offset_map[player.direction].y
-		switch player.holding.direction {
-		case .UP:
-		case .DOWN:
-		   player.holding.collider.width = colliderWidth
-		   player.holding.collider.height = colliderHeight
-		case .LEFT:
-		case .RIGHT:
-		   player.holding.collider.width = colliderHeight
-		   player.holding.collider.height = colliderWidth
-		}
-		player.holding.combined_collider = player.holding.collider
 	}
 
 	player.combined_collider = player.collider
-	combine_rects(player)
+
+	if (player.holding.item != nil) {
+        held_item_update(player)
+        combine_rects(player)
+	}
 
 	if (player.direction != currentDirection && !can_direction_change(player, gs.solid_tiles[:], dt)) {
 		player.input = {}
@@ -111,15 +123,6 @@ player_update :: proc(dt: f32) {
 			combine_rects(player)
 		}
 	}
-
-	// if (player.holding.item != nil) {
-	// 	player.state = .HOLD
-	// 	player.holding.x = player.x
-	// 	player.holding.y = player.y
-	// 	player.holding.direction = player.direction
-	// 	player.holding.x += player.holding.offset_map[player.direction].x
-	// 	player.holding.y += player.holding.offset_map[player.direction].y
-	// }
 
 	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
 }
