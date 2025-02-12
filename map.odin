@@ -118,10 +118,13 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 					})
 				}
 			}
-		case "Wall_Decoration":
-			// Tiles
+		case "Walls_Behind":
 			for auto_tile in layer.autoLayerTiles {
 				append(&l.walls, Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath})
+			}
+		case "Walls_Front":
+			for auto_tile in layer.autoLayerTiles {
+				append(&l.walls_fore, Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath})
 			}
 		case "Collision":
 			x, y: f32
@@ -153,11 +156,13 @@ level_load :: proc(level: ^Level) {
 	clear(&gs.colliders)
 	clear(&gs.tiles)
 	clear(&gs.walls)
+	clear(&gs.walls_fore)
 
 	append(&gs.entities, ..level.entities[:])
 	append(&gs.colliders, ..level.colliders[:])
 	append(&gs.tiles, ..level.tiles[:])
 	append(&gs.walls, ..level.walls[:])
+	append(&gs.walls_fore, ..level.walls_fore[:])
 
 	gs.player_id = entity_create(
 		{

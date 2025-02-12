@@ -51,12 +51,18 @@ render_entity :: proc(entity: ^Entity) {
     render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
 }
 
-render_map :: proc() {
+render_background :: proc() {
     for &tile in gs.tiles {
         render_tile(&tile, floor_sheet.texture)
     }
     for &wall in gs.walls {
         render_tile(&wall, walls_sheet.texture)
+    }
+}
+
+render_foreground :: proc() {
+    for &tile in gs.walls_fore {
+        render_tile(&tile, walls_sheet.texture)
     }
 }
 
@@ -70,7 +76,7 @@ render_frame :: proc() {
     player := entity_get(gs.player_id)
     player.animation = player_animations_map[{player.direction, player.state}]
     
-    render_map()
+    render_background()
 
     entities_to_render: []^Entity = make([]^Entity, len(gs.entities), context.temp_allocator)
     for i in 0..<len(gs.entities) {
@@ -91,6 +97,8 @@ render_frame :: proc() {
     for entity in entities_to_render {
         render_entity(entity)
     }
+
+    render_foreground()
     
     for s in gs.debug_shapes {
 		switch v in s {

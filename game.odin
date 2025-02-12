@@ -51,6 +51,7 @@ Game_State :: struct {
 	colliders:  [dynamic]Rect,
 	tiles:     [dynamic]Tile,
 	walls:     [dynamic]Tile,
+	walls_fore:     [dynamic]Tile,
 	debug_shapes: [dynamic]Debug_Shape,
 	level_defintions:       map[string]Level,
 	level:                  ^Level,
@@ -98,6 +99,7 @@ Level :: struct {
 	colliders:    [dynamic]Rect,
 	tiles:        [dynamic]Tile,
 	walls:        [dynamic]Tile,
+	walls_fore:        [dynamic]Tile,
 }
 
 Tile :: struct {
