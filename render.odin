@@ -15,7 +15,7 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
 }
 
-render_tile :: proc(tile: ^Tile) {
+render_tile :: proc(tile: ^Tile, texture: rl.Texture2D) {
     width: f32 = tileWidth
     height: f32 = tileWidth
 
@@ -25,10 +25,8 @@ render_tile :: proc(tile: ^Tile) {
         height = -tileWidth
     }
 
-    thing := Rect{tile.src.x, tile.src.y, width, height}
-    rl.DrawRectangleLinesEx(thing, 1, rl.GREEN);
     rl.DrawTextureRec(
-        floor_sheet.texture,
+        texture,
         {tile.src.x, tile.src.y, width, height},
         tile.pos,
         rl.WHITE,
@@ -55,7 +53,10 @@ render_entity :: proc(entity: ^Entity) {
 
 render_map :: proc() {
     for &tile in gs.tiles {
-        render_tile(&tile)
+        render_tile(&tile, floor_sheet.texture)
+    }
+    for &wall in gs.walls {
+        render_tile(&wall, walls_sheet.texture)
     }
 }
 

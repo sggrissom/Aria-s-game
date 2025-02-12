@@ -138,7 +138,7 @@ combine_rects :: proc(entity: ^Entity) {
 
 	heldRect := get_static_collider(entity.holding.item^)
 
-	debug_draw_rect(heldRect, 1, rl.GREEN)
+	//debug_draw_rect(heldRect, 1, rl.GREEN)
 
 	new_x := math.min(checkRect.x, heldRect.x)
 	new_y := math.min(checkRect.y, heldRect.y)

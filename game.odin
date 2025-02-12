@@ -50,6 +50,7 @@ Game_State :: struct {
 	entities:     [dynamic]Entity,
 	colliders:  [dynamic]Rect,
 	tiles:     [dynamic]Tile,
+	walls:     [dynamic]Tile,
 	debug_shapes: [dynamic]Debug_Shape,
 	level_defintions:       map[string]Level,
 	level:                  ^Level,
@@ -96,6 +97,7 @@ Level :: struct {
 	entities:     [dynamic]Entity,
 	colliders:    [dynamic]Rect,
 	tiles:        [dynamic]Tile,
+	walls:        [dynamic]Tile,
 }
 
 Tile :: struct {
@@ -160,7 +162,6 @@ main :: proc() {
 		sprite_columns = 24,
 	}
 
-	//read_map("resources/wall.map")
 	read_map_ldtk("resources/game.ldtk")
 	level_load(&gs.level_defintions["f8a3ba30-c210-11ef-a83b-c97012fb84fc"])
 	init_player_animations()

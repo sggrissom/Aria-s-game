@@ -18,10 +18,6 @@ entity_create :: proc(entity: Entity) -> Entity_Id {
     return Entity_Id(index)
 }
 
-solid_tile_create :: proc(entity: Entity) {
-    append(&gs.colliders, entity)
-}
-
 entity_get :: proc(id: Entity_Id) -> ^Entity {
     if int(id) >= len(gs.entities) {
 		return nil
