@@ -104,6 +104,18 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 				case "Player":
 					l.player_spawn = Vec2{entity.__worldX, entity.__worldY}
 				case "Cart":
+					x, y := entity.__worldX, entity.__worldY
+					width, height := entity.width, entity.height
+
+					append(&l.entities, Entity{
+						position = {x = x, y = y, width = width, height = height},
+						collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
+						combined_collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
+						direction = Direction.RIGHT,
+						move_speed = 200,
+						flags = {.Cart, .Debug_Draw},
+						state = .EMPTY
+					})
 				}
 			}
 		case "Wall_Decoration":
