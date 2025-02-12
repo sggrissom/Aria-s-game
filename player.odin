@@ -99,7 +99,7 @@ player_update :: proc(dt: f32) {
         combine_rects(player)
 	}
 
-	if (player.direction != currentDirection && !can_direction_change(player, gs.solid_tiles[:], dt)) {
+	if (player.direction != currentDirection && !can_direction_change(player, gs.colliders[:], dt)) {
 		player.input = {}
 		player.direction = currentDirection
 		player.state = .STILL

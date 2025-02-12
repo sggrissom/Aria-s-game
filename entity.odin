@@ -19,7 +19,7 @@ entity_create :: proc(entity: Entity) -> Entity_Id {
 }
 
 solid_tile_create :: proc(entity: Entity) {
-    append(&gs.solid_tiles, entity)
+    append(&gs.colliders, entity)
 }
 
 entity_get :: proc(id: Entity_Id) -> ^Entity {

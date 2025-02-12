@@ -6,11 +6,10 @@ gs : Game_State
 cart_sheet : Sprite_Sheet
 store_sheet : Sprite_Sheet
 walls_sheet : Sprite_Sheet
+floor_sheet : Sprite_Sheet
 player_sheet : Sprite_Sheet
 player_walk_sheet : Sprite_Sheet
 player_push_sheet : Sprite_Sheet
-
-game_map : ^Map
 
 AnimationStateKey :: struct {
     direction: Direction,

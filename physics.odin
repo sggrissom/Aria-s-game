@@ -17,14 +17,14 @@ get_static_collider :: proc(entity: Entity) -> Rect {
 
 PHYSICS_ITERATIONS :: 8
 
-can_direction_change :: proc(entity: ^Entity, static_colliders: []Entity, dt: f32) -> bool {
+can_direction_change :: proc(entity: ^Entity, static_colliders: []Rect, dt: f32) -> bool {
     prevY := entity.y
     prevX := entity.x
     entity.y += entity.input.y * entity.move_speed * dt
     entity.x += entity.input.x * entity.move_speed * dt
 
     for static in static_colliders {
-        if rl.CheckCollisionRecs(get_static_collider(entity^), get_static_collider(static)) {
+        if rl.CheckCollisionRecs(get_static_collider(entity^), static) {
             entity.x = prevX
             entity.y = prevY
             return false
@@ -36,7 +36,7 @@ can_direction_change :: proc(entity: ^Entity, static_colliders: []Entity, dt: f3
     return true
 }
 
-physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
+physics_update :: proc(entities: []Entity, static_colliders: []Rect, dt: f32)
 {
     for &entity, e_id in entities {
         entity_id := Entity_Id(e_id)
@@ -47,7 +47,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
             entity.y += entity.input.y * entity.move_speed * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
+                if rl.CheckCollisionRecs(get_static_collider(entity), static) {
                     if entity.input.y > 0 {
                         //DOWN
                         entity.y = static.y - entity.combined_collider.height - entity.combined_collider.y
@@ -62,7 +62,7 @@ physics_update :: proc(entities: []Entity, static_colliders: []Entity, dt: f32)
 
             entity.x += entity.input.x * entity.move_speed * step
             for static in static_colliders {
-                if rl.CheckCollisionRecs(get_static_collider(entity), get_static_collider(static)) {
+                if rl.CheckCollisionRecs(get_static_collider(entity), static) {
                     if entity.input.x > 0 {
                         //RIGHT
                         entity.x = static.x - entity.combined_collider.width - entity.combined_collider.x

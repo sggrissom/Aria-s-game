@@ -15,6 +15,26 @@ render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl
     rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
 }
 
+render_tile :: proc(tile: ^Tile) {
+    width: f32 = tileWidth
+    height: f32 = tileWidth
+
+    if tile.f == 1 || tile.f == 3 {
+        width = -tileWidth
+    } else if tile.f == 2 || tile.f == 3 {
+        height = -tileWidth
+    }
+
+    thing := Rect{tile.src.x, tile.src.y, width, height}
+    rl.DrawRectangleLinesEx(thing, 1, rl.GREEN);
+    rl.DrawTextureRec(
+        floor_sheet.texture,
+        {tile.src.x, tile.src.y, width, height},
+        tile.pos,
+        rl.WHITE,
+    )
+}
+
 render_entity :: proc(entity: ^Entity) {
     if .Cart in entity.flags {
         entity.animation = cart_animations_map[{entity.direction, entity.state}]
@@ -34,8 +54,8 @@ render_entity :: proc(entity: ^Entity) {
 }
 
 render_map :: proc() {
-    for &tile in gs.solid_tiles {
-        render_entity(&tile)
+    for &tile in gs.tiles {
+        render_tile(&tile)
     }
 }
 
