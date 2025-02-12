@@ -1,12 +1,86 @@
 #+feature dynamic-literals
 package main
 
+import "core:encoding/json"
+import "core:log"
 import "core:os"
 import "core:strconv"
 import "core:strings"
 import rl "vendor:raylib"
 
 tileWidth :: 48
+
+LDtk_Data :: struct {
+	levels: []LDtk_Level,
+}
+
+LDtk_Level :: struct {
+	identifier: string,
+	layerInstances: []LDtk_Layer_Instance,
+}
+
+LDtk_Layer_Instance :: struct {
+	__identifier: string,
+	__type: string,
+	__cWid, __cHei: int,
+	intGridCsv: []int,
+	autoLayerTiles: []LDtk_Auto_Layer_Tile,
+	entityInstances: []LDtk_Entity,
+}
+
+LDtk_Auto_Layer_Tile :: struct {
+	px: [2]f32,
+}
+
+LDtk_Entity :: struct {
+	__identifier: string,
+	__worldX: f32,
+	__worldY: f32,
+}
+
+
+read_map_ldtk :: proc(filepath: string) {
+	level_data, ok := os.read_entire_file(filepath, allocator = context.allocator)
+	assert(ok, "Failed to load level data")
+
+	ldtk_data := new(LDtk_Data, context.temp_allocator)
+	err := json.unmarshal(level_data, ldtk_data, allocator = context.temp_allocator)
+	if err != nil {
+		log.panicf("failed to parse json: %v", err)
+	}
+
+	for &level in ldtk_data.levels {
+		level_parse_and_store(&gs, &level)
+	}
+}
+
+level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
+	for layer in level.layerInstances {
+		switch layer.__identifier {
+		case "Entities":
+			for entity in layer.entityInstances {
+				// switch entity.__identifier {
+				// case "Player":
+				// case "Cart":
+				// }
+			}
+		case "Collisions":
+			solid_tiles := make([dynamic]Rect, context.temp_allocator)
+
+			x, y: f32
+			for v, i in layer.intGridCsv {
+				if v != 0 {
+					append(&solid_tiles, Rect{x, y, tileWidth, tileWidth})
+				}
+				x += tileWidth
+				if (i + 1) % layer.__cWid == 0 {
+					y += tileWidth
+					x = 0
+				}
+			}
+		}
+	}
+}
 
 read_map :: proc(filepath: string) {
 	data, ok := os.read_entire_file(filepath, context.allocator)

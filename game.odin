@@ -141,6 +141,7 @@ main :: proc() {
 	}
 
 	read_map("resources/wall.map")
+	read_map_ldtk("resources/game.ldtk")
 	init_player_animations()
 
 	for !rl.WindowShouldClose() {
