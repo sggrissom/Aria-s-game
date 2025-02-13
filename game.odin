@@ -38,7 +38,7 @@ ZOOM :: 2
 BG_COLOR :: rl.GRAY
 
 colliderWidth :: 20
-colliderHeight :: 10
+colliderHeight :: 20
 playerHeight :: 48
 playerWidth :: 33
 CART_OFFSET :: 22

@@ -27,6 +27,7 @@ can_direction_change :: proc(entity: ^Entity, static_colliders: []Rect, dt: f32)
         if rl.CheckCollisionRecs(get_static_collider(entity^), static) {
             entity.x = prevX
             entity.y = prevY
+            entity.input = {0, 0}
             return false
         }
     }

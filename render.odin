@@ -45,6 +45,10 @@ render_entity :: proc(entity: ^Entity) {
         frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
     }
     if (.Debug_Draw in entity.flags) {
+        if (entity.holding.item != nil) {
+            rl.DrawRectangleLinesEx(get_static_collider(entity.holding.item^), 1, rl.BLUE);
+        }
+        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE);
         rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN);
     }
     assert(frameIndex < len(entity.animation.frames))

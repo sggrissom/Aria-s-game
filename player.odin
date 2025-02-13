@@ -11,15 +11,14 @@ try_pick_up_entity :: proc(player: ^Entity) {
     for key in player.entity_ids {
         item := entity_get(key)
         item.flags += {.Removed}
-        if .In_Motion in player.flags {
-            item.flags += {.In_Motion}
-        }
         player.holding.item = item
-        player.holding.offset_map = make(map[Direction]Vec2)
-        player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
-        player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
-        player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
-        player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+		if .Cart in item.flags {
+			player.holding.offset_map = make(map[Direction]Vec2)
+			player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
+			player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
+			player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
+			player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+		}
         break
     }
 }
@@ -32,7 +31,6 @@ drop_entity :: proc(player: ^Entity) {
 }
 
 held_item_update :: proc(player: ^Entity) {
-    player.state = .HOLD
     player.holding.x = player.x
     player.holding.y = player.y
     player.holding.direction = player.direction
@@ -49,41 +47,20 @@ held_item_update :: proc(player: ^Entity) {
         player.holding.collider.height = colliderWidth
     }
     player.holding.combined_collider = player.holding.collider
+        player.holding.combined_collider.y += 10
 }
 
 player_update :: proc(dt: f32) {
 	player := entity_get(gs.player_id)
 	player.input = {}
-	player.state = .STILL
-	player.flags -= {.In_Motion}
+	player.flags -= { .In_Motion }
 
 	player.combined_collider = player.collider
 
-	currentDirection :=  player.direction
-	if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) {
-		player.input.y = -1
-		player.direction = .UP
-		player.state = .WALK
-		player.flags += {.In_Motion}
-	}
-	if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) {
-		player.input.y = 1
-		player.direction = .DOWN
-		player.state = .WALK
-		player.flags += {.In_Motion}
-	}
-	if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) {
-		player.input.x = -1
-		player.direction = .LEFT
-		player.state = .WALK
-		player.flags += {.In_Motion}
-	}
-	if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) {
-		player.input.x = 1
-		player.direction = .RIGHT
-		player.state = .WALK
-		player.flags += {.In_Motion}
-	}
+	if rl.IsKeyDown(.W) || rl.IsKeyDown(.UP) do player.input.y = -1
+	if rl.IsKeyDown(.S) || rl.IsKeyDown(.DOWN) do player.input.y = 1
+	if rl.IsKeyDown(.A) || rl.IsKeyDown(.LEFT) do player.input.x = -1
+	if rl.IsKeyDown(.D) || rl.IsKeyDown(.RIGHT) do player.input.x = 1
 	if rl.IsKeyPressed(rl.KeyboardKey.SPACE) {
 		if player.holding.item == nil {
             try_pick_up_entity(player)
@@ -92,34 +69,39 @@ player_update :: proc(dt: f32) {
 		}
 	}
 
-	player.combined_collider = player.collider
+	isMoving := player.input != {0, 0}
+	if isMoving {
+		player.flags += { .In_Motion }
+	}
+	isHolding := player.holding.item != nil
 
-	if (player.holding.item != nil) {
-        held_item_update(player)
-        combine_rects(player)
+	switch player.state {
+		case .STILL:
+			if isMoving do player.state = .WALK
+			if isHolding do player.state = .HOLD
+		case .WALK:
+			if !isMoving do player.state = .STILL
+			if isHolding do player.state = .HOLD
+		case .HOLD:
+			if !isHolding && isMoving do player.state = .WALK
+			if !isHolding && !isMoving do player.state = .STILL
+		case .EMPTY:
+		case .FULL:
 	}
 
-	if (player.direction != currentDirection && !can_direction_change(player, gs.colliders[:], dt)) {
-		player.input = {}
-		player.direction = currentDirection
-		player.state = .STILL
-		player.flags -= {.In_Motion}
-		if (player.holding.item != nil) {
-			player.state = .HOLD
-			player.holding.direction = player.direction
-			player.holding.x += player.holding.offset_map[player.direction].x
-			player.holding.y += player.holding.offset_map[player.direction].y
-			switch player.holding.direction {
-			case .UP:
-			case .DOWN:
-			player.holding.collider.width = colliderWidth
-			player.holding.collider.height = colliderHeight
-			case .LEFT:
-			case .RIGHT:
-			player.holding.collider.width = colliderHeight
-			player.holding.collider.height = colliderWidth
-			}
-			player.holding.combined_collider = player.holding.collider
+	prevDirection := player.direction
+	if player.input.x == 1 do player.direction = .RIGHT
+	if player.input.x == -1 do player.direction = .LEFT
+	if player.input.y == 1 do player.direction = .DOWN
+	if player.input.y == -1 do player.direction = .UP
+	directionChanged := player.direction != prevDirection
+
+	if (isHolding) {
+        held_item_update(player)
+        combine_rects(player)
+		if directionChanged && !can_direction_change(player, gs.colliders[:], dt) {
+			player.direction = prevDirection
+			held_item_update(player)
 			combine_rects(player)
 		}
 	}
