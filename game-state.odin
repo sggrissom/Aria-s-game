@@ -10,6 +10,7 @@ floor_sheet : Sprite_Sheet
 player_sheet : Sprite_Sheet
 player_walk_sheet : Sprite_Sheet
 player_push_sheet : Sprite_Sheet
+blue_sheet : Sprite_Sheet
 
 AnimationStateKey :: struct {
     direction: Direction,
@@ -67,22 +68,22 @@ init_player_animations :: proc()
     cart_animations_map[{.DOWN, .FULL}].frames_per_second = CART_FRAMES
 
     player_animations_map[{.UP, .STILL}] = new(Animation)
-    player_animations_map[{.UP, .STILL}].sprite_sheet = &player_sheet
+    player_animations_map[{.UP, .STILL}].sprite_sheet = &blue_sheet
     player_animations_map[{.UP, .STILL}].frames = {1}
     player_animations_map[{.UP, .STILL}].frames_per_second = CART_FRAMES
 
     player_animations_map[{.DOWN, .STILL}] = new(Animation)
-    player_animations_map[{.DOWN, .STILL}].sprite_sheet = &player_sheet
+    player_animations_map[{.DOWN, .STILL}].sprite_sheet = &blue_sheet
     player_animations_map[{.DOWN, .STILL}].frames = {3}
     player_animations_map[{.DOWN, .STILL}].frames_per_second = CART_FRAMES
 
     player_animations_map[{.LEFT, .STILL}] = new(Animation)
-    player_animations_map[{.LEFT, .STILL}].sprite_sheet = &player_sheet
+    player_animations_map[{.LEFT, .STILL}].sprite_sheet = &blue_sheet
     player_animations_map[{.LEFT, .STILL}].frames = {2}
     player_animations_map[{.LEFT, .STILL}].frames_per_second = CART_FRAMES
 
     player_animations_map[{.RIGHT, .STILL}] = new(Animation)
-    player_animations_map[{.RIGHT, .STILL}].sprite_sheet = &player_sheet
+    player_animations_map[{.RIGHT, .STILL}].sprite_sheet = &blue_sheet
     player_animations_map[{.RIGHT, .STILL}].frames = {0}
     player_animations_map[{.RIGHT, .STILL}].frames_per_second = CART_FRAMES
     

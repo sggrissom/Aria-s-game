@@ -37,6 +37,14 @@ render_entity :: proc(entity: ^Entity) {
     if .Cart in entity.flags {
         entity.animation = cart_animations_map[{entity.direction, entity.state}]
     }
+    if .Shelf in entity.flags {
+
+        anim := new(Animation)
+        anim.sprite_sheet = &blue_sheet
+        anim.frames = {0, 1, 2, 3}
+        anim.frames_per_second = 3
+        entity.animation = anim
+    }
     if (entity.animation == nil) {
         return
     }

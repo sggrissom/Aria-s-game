@@ -30,6 +30,7 @@ Entity_Flags :: enum {
 	Debug_Draw,
 	In_Motion,
 	Cart,
+	Shelf,
 }
 
 WINDOW_WIDTH :: 1280
@@ -162,6 +163,12 @@ main :: proc() {
 		sheet_size     = {1156, 80},
 		sprite_rows    = 1,
 		sprite_columns = 24,
+	}
+	blue_sheet = Sprite_Sheet {
+		texture        = rl.LoadTexture("resources/blue_char.png"),
+		sheet_size     = {2688, 1920},
+		sprite_rows    = 40,
+		sprite_columns = 56,
 	}
 
 	read_map_ldtk("resources/game.ldtk")
