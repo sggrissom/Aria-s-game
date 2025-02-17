@@ -4,6 +4,7 @@ import "core:fmt"
 import "core:math"
 import "core:math/linalg"
 import "core:math/rand"
+import "core:strings"
 import "core:time"
 import rl "vendor:raylib"
 
@@ -109,12 +110,41 @@ player_update :: proc(dt: f32) {
 
 	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
 
-	if directionChanged {
-		if player.direction == .UP do switch_animation(player, "idle-up")
-		if player.direction == .DOWN do switch_animation(player, "idle-down")
-		if player.direction == .LEFT do switch_animation(player, "idle-left")
-		if player.direction == .RIGHT do switch_animation(player, "idle-right")
+	stateName := get_state_animation_name(player)
+	directionName := get_direction_animation_name(player)
+	builder := new(strings.Builder, context.temp_allocator)
+	animationName := fmt.sbprintf(builder, "%s-%s", stateName, directionName)
+	if animationName != player.current_anim_name do switch_animation(player, animationName)
+}
+
+get_direction_animation_name :: proc (entity: ^Entity) -> string {
+	switch entity.direction {
+		case .LEFT:
+			return "left"
+		case .RIGHT:
+			return "right"
+		case .UP:
+			return "up"
+		case .DOWN:
+			return "down"
 	}
+	return ""
+}
+
+get_state_animation_name :: proc (entity: ^Entity) -> string {
+	switch entity.state {
+		case .STILL:
+			return "idle"
+		case .WALK:
+			return "walk"
+		case .HOLD:
+			return "push"
+		case .EMPTY:
+			return "empty"
+		case .FULL:
+			return "full"
+	}
+	return ""
 }
 
 combine_rects :: proc(entity: ^Entity) {

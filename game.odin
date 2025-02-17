@@ -135,62 +135,10 @@ main :: proc() {
 	rl.SetTargetFPS(60)
 
 	store_texture = rl.LoadTexture("resources/STORE.png")
-	// store_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/STORE.png"),
-	// 	sheet_size     = {48, 80},
-	// 	sprite_rows    = 2,
-	// 	sprite_columns = 1,
-	// }
 	walls_texture = rl.LoadTexture("resources/WALLS-2.png")
-	// walls_sheet = Sprite_Sheet {
-	// 	texture        = ,
-	// 	sheet_size     = {384, 288},
-	// 	sprite_rows    = 6,
-	// 	sprite_columns = 8,
-	// }
 	floor_texture = rl.LoadTexture("resources/floors.png")
-	// floor_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/floors.png"),
-	// 	sheet_size     = {384, 288},
-	// 	sprite_rows    = 6,
-	// 	sprite_columns = 8,
-	// }
 	cart_texture = rl.LoadTexture("resources/CART.png")
-	// cart_sheet = Sprite_Sheet {
-	// 	texture        = ,
-	// 	sheet_size     = {288, 768},
-	// 	sprite_rows    = 8,
-	// 	sprite_columns = 3,
-	// }
-	player_texture = rl.LoadTexture("resources/char.png")
-	// player_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/char.png"),
-	// 	sheet_size     = {192, 70},
-	// 	sprite_rows    = 1,
-	// 	sprite_columns = 4,
-	// }
-	player_walk_texture = rl.LoadTexture("resources/char_walk.png")
-	// player_walk_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/char_walk.png"),
-	// 	sheet_size     = {1152, 78},
-	// 	sprite_rows    = 1,
-	// 	sprite_columns = 24,
-	// }
-
-	player_push_texture = rl.LoadTexture("resources/char_push.png")
-	// player_push_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/char_push.png"),
-	// 	sheet_size     = {1156, 80},
-	// 	sprite_rows    = 1,
-	// 	sprite_columns = 24,
-	// }
 	blue_char_texture = rl.LoadTexture("resources/blue-char.png")
-	// blue_sheet = Sprite_Sheet {
-	// 	texture        = rl.LoadTexture("resources/blue_char.png"),
-	// 	sheet_size     = {2688, 1920},
-	// 	sprite_rows    = 40,
-	// 	sprite_columns = 56,
-	// }
 
 	read_map_ldtk("resources/game.ldtk")
 	level_load(&gs.level_defintions["f8a3ba30-c210-11ef-a83b-c97012fb84fc"])
