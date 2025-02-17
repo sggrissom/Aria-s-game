@@ -91,6 +91,16 @@ read_map_ldtk :: proc(filepath: string) {
 level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 	l: Level
 
+    player_anim_idle := Animation {
+		size   = {2688, 1920},
+		offset = {0, 0},
+		start  = 0,
+		end    = 3,
+		row    = 1,
+		time   = 0.15,
+		flags  = {.Loop},
+	}
+
 	l.iid = strings.clone(level.iid)
 	l.name = strings.clone(level.identifier)
 
@@ -114,7 +124,9 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 						direction = Direction.RIGHT,
 						move_speed = 200,
 						flags = {.Cart, .Debug_Draw},
-						state = .EMPTY
+						state = .EMPTY,
+						texture = &blue_char_texture,
+						current_anim_name = "idle-right",
 					})
 				case "Shelf":
 					x, y := entity.__worldX, entity.__worldY
@@ -193,6 +205,8 @@ level_load :: proc(level: ^Level) {
 			direction = Direction.RIGHT,
 			move_speed = 200,
 			flags = {.Debug_Draw},
+			texture = &blue_char_texture,
+			current_anim_name = "idle-right",
 		},
 	)
 }

@@ -64,13 +64,17 @@ Entity :: struct {
 	using position:             Rect,
 	input:                      Vec2,
 	move_speed:                 f32,
-	animation:                  ^Animation,
 	state:                      EntityState,
 	direction:                  Direction,
 	holding:                    HeldEntity,
 	flags:                      bit_set[Entity_Flags],
 	on_enter, on_stay, on_exit: proc(self_id, other_id: Entity_Id),
 	entity_ids:                 map[Entity_Id]time.Time,
+	texture:                    ^rl.Texture,
+	animations:                 map[string]^Animation,
+	current_anim_name:          string,
+	current_anim_frame:         int,
+	animation_timer:            f32,
 }
 
 HeldEntity :: struct {
@@ -78,17 +82,25 @@ HeldEntity :: struct {
 	offset_map: map[Direction]Vec2,
 }
 
-Sprite_Sheet :: struct {
-	texture:        rl.Texture2D,
-	sheet_size:     Vec2,
-	sprite_rows:    int,
-	sprite_columns: int,
+Animation :: struct {
+	size:         Vec2,
+	offset:       Vec2,
+	start:        int,
+	end:          int,
+	row:          int,
+	time:         f32,
+	flags:        bit_set[Animation_Flags],
 }
 
-Animation :: struct {
-	sprite_sheet:      ^Sprite_Sheet,
-	frames_per_second: int,
-	frames:            [dynamic]int,
+Animation_Flags :: enum {
+	Loop,
+	Ping_Pong,
+}
+
+Animation_Event :: struct {
+	timer:    f32,
+	duration: f32,
+	callback: proc(gs: ^Game_State, entity: ^Entity),
 }
 
 Level :: struct {
@@ -122,54 +134,63 @@ main :: proc() {
 	rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
 	rl.SetTargetFPS(60)
 
-	store_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/STORE.png"),
-		sheet_size     = {48, 80},
-		sprite_rows    = 2,
-		sprite_columns = 1,
-	}
-	walls_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/WALLS-2.png"),
-		sheet_size     = {384, 288},
-		sprite_rows    = 6,
-		sprite_columns = 8,
-	}
-	floor_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/floors.png"),
-		sheet_size     = {384, 288},
-		sprite_rows    = 6,
-		sprite_columns = 8,
-	}
-	cart_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/CART.png"),
-		sheet_size     = {288, 768},
-		sprite_rows    = 8,
-		sprite_columns = 3,
-	}
-	player_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/char.png"),
-		sheet_size     = {192, 70},
-		sprite_rows    = 1,
-		sprite_columns = 4,
-	}
-	player_walk_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/char_walk.png"),
-		sheet_size     = {1152, 78},
-		sprite_rows    = 1,
-		sprite_columns = 24,
-	}
-	player_push_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/char_push.png"),
-		sheet_size     = {1156, 80},
-		sprite_rows    = 1,
-		sprite_columns = 24,
-	}
-	blue_sheet = Sprite_Sheet {
-		texture        = rl.LoadTexture("resources/blue_char.png"),
-		sheet_size     = {2688, 1920},
-		sprite_rows    = 40,
-		sprite_columns = 56,
-	}
+	store_texture = rl.LoadTexture("resources/STORE.png")
+	// store_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/STORE.png"),
+	// 	sheet_size     = {48, 80},
+	// 	sprite_rows    = 2,
+	// 	sprite_columns = 1,
+	// }
+	walls_texture = rl.LoadTexture("resources/WALLS-2.png")
+	// walls_sheet = Sprite_Sheet {
+	// 	texture        = ,
+	// 	sheet_size     = {384, 288},
+	// 	sprite_rows    = 6,
+	// 	sprite_columns = 8,
+	// }
+	floor_texture = rl.LoadTexture("resources/floors.png")
+	// floor_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/floors.png"),
+	// 	sheet_size     = {384, 288},
+	// 	sprite_rows    = 6,
+	// 	sprite_columns = 8,
+	// }
+	cart_texture = rl.LoadTexture("resources/CART.png")
+	// cart_sheet = Sprite_Sheet {
+	// 	texture        = ,
+	// 	sheet_size     = {288, 768},
+	// 	sprite_rows    = 8,
+	// 	sprite_columns = 3,
+	// }
+	player_texture = rl.LoadTexture("resources/char.png")
+	// player_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/char.png"),
+	// 	sheet_size     = {192, 70},
+	// 	sprite_rows    = 1,
+	// 	sprite_columns = 4,
+	// }
+	player_walk_texture = rl.LoadTexture("resources/char_walk.png")
+	// player_walk_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/char_walk.png"),
+	// 	sheet_size     = {1152, 78},
+	// 	sprite_rows    = 1,
+	// 	sprite_columns = 24,
+	// }
+
+	player_push_texture = rl.LoadTexture("resources/char_push.png")
+	// player_push_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/char_push.png"),
+	// 	sheet_size     = {1156, 80},
+	// 	sprite_rows    = 1,
+	// 	sprite_columns = 24,
+	// }
+	blue_char_texture = rl.LoadTexture("resources/blue-char.png")
+	// blue_sheet = Sprite_Sheet {
+	// 	texture        = rl.LoadTexture("resources/blue_char.png"),
+	// 	sheet_size     = {2688, 1920},
+	// 	sprite_rows    = 40,
+	// 	sprite_columns = 56,
+	// }
 
 	read_map_ldtk("resources/game.ldtk")
 	level_load(&gs.level_defintions["f8a3ba30-c210-11ef-a83b-c97012fb84fc"])
@@ -180,6 +201,7 @@ main :: proc() {
 
 		player_update(dt)
 		physics_update(gs.entities[:], gs.colliders[:], dt)
+		entity_update(dt)
 		render_frame()
 	}
 }

@@ -101,12 +101,20 @@ player_update :: proc(dt: f32) {
         combine_rects(player)
 		if directionChanged && !can_direction_change(player, gs.colliders[:], dt) {
 			player.direction = prevDirection
+			directionChanged = false
 			held_item_update(player)
 			combine_rects(player)
 		}
 	}
 
 	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
+
+	if directionChanged {
+		if player.direction == .UP do switch_animation(player, "idle-up")
+		if player.direction == .DOWN do switch_animation(player, "idle-down")
+		if player.direction == .LEFT do switch_animation(player, "idle-left")
+		if player.direction == .RIGHT do switch_animation(player, "idle-right")
+	}
 }
 
 combine_rects :: proc(entity: ^Entity) {

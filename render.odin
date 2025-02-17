@@ -3,18 +3,6 @@ package main
 
 import rl "vendor:raylib"
 
-render_sprite :: proc(sprite_sheet: ^Sprite_Sheet, spriteToRender: int, dest: rl.Rectangle)
-{
-    sprite_width :f32 = sprite_sheet.sheet_size.x / f32(sprite_sheet.sprite_columns);
-    sprite_height :f32 = sprite_sheet.sheet_size.y / f32(sprite_sheet.sprite_rows);
-
-    sprite_row : int = spriteToRender / sprite_sheet.sprite_columns
-    sprite_column : int = spriteToRender % sprite_sheet.sprite_columns
-
-    sourceRec : rl.Rectangle = { sprite_width * f32(sprite_column), (sprite_height * f32(sprite_row)), sprite_width, sprite_height };
-    rl.DrawTexturePro(sprite_sheet.texture, sourceRec, dest, {0, 0}, 0, rl.WHITE);
-}
-
 render_tile :: proc(tile: ^Tile, texture: rl.Texture2D) {
     width: f32 = tileWidth
     height: f32 = tileWidth
@@ -33,48 +21,41 @@ render_tile :: proc(tile: ^Tile, texture: rl.Texture2D) {
     )
 }
 
-render_entity :: proc(entity: ^Entity) {
-    if .Cart in entity.flags {
-        entity.animation = cart_animations_map[{entity.direction, entity.state}]
-    }
-    if .Shelf in entity.flags {
+render_entity :: proc(entity: ^Entity, dt: f32) {
+    if .Removed in entity.flags do return 
 
-        anim := new(Animation)
-        anim.sprite_sheet = &blue_sheet
-        anim.frames = {0, 1, 2, 3}
-        anim.frames_per_second = 3
-        entity.animation = anim
-    }
-    if (entity.animation == nil) {
-        return
-    }
-    frameIndex := 0
-    if (.In_Motion in entity.flags && len(entity.animation.frames) > 1) {
-        frameIndex = int(rl.GetTime() * f64(entity.animation.frames_per_second)) % int(len(entity.animation.frames))
-    }
-    if (.Debug_Draw in entity.flags) {
-        if (entity.holding.item != nil) {
-            rl.DrawRectangleLinesEx(get_static_collider(entity.holding.item^), 1, rl.BLUE);
+    if entity.texture != nil {
+        entity.animation_timer -= dt
+
+        animation := entity.animations[entity.current_anim_name]
+        if animation != nil {
+            source := Rect {
+                f32(entity.current_anim_frame) * animation.size.x,
+                f32(animation.row) * animation.size.y,
+                animation.size.x,
+                animation.size.y,
+            }
+
+            rl.DrawTextureRec(entity.texture^, source, {entity.x, entity.y} - animation.offset, rl.WHITE)
         }
-        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE);
-        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN);
     }
-    assert(frameIndex < len(entity.animation.frames))
-    render_sprite(entity.animation.sprite_sheet, entity.animation.frames[frameIndex], entity.position)
+    if .Debug_Draw in entity.flags {
+        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
+    }
 }
 
 render_background :: proc() {
     for &tile in gs.tiles {
-        render_tile(&tile, floor_sheet.texture)
+        render_tile(&tile, floor_texture)
     }
     for &wall in gs.walls {
-        render_tile(&wall, walls_sheet.texture)
+        render_tile(&wall, walls_texture)
     }
 }
 
 render_foreground :: proc() {
     for &tile in gs.walls_fore {
-        render_tile(&tile, walls_sheet.texture)
+        render_tile(&tile, walls_texture)
     }
 }
 
@@ -83,10 +64,7 @@ render_frame :: proc() {
     rl.ClearBackground(BG_COLOR)
     rl.BeginMode2D(gs.cam)
 
-    animation :^Animation
-    
     player := entity_get(gs.player_id)
-    player.animation = player_animations_map[{player.direction, player.state}]
     
     render_background()
 
@@ -107,7 +85,7 @@ render_frame :: proc() {
     }
     
     for entity in entities_to_render {
-        render_entity(entity)
+        render_entity(entity, rl.GetFrameTime())
     }
 
     render_foreground()
@@ -135,6 +113,7 @@ render_frame :: proc() {
         rl.DrawText(rl.TextFormat("touching id: %02i", int(id)), 10, i32(y_line), 10, rl.WHITE)
         y_line += 20
     }
+    rl.DrawText(rl.TextFormat("animation: %s", player.current_anim_name), 10, i32(y_line), 10, rl.WHITE)
     rl.EndDrawing()
 
     clear(&gs.debug_shapes)
