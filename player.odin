@@ -11,21 +11,24 @@ import rl "vendor:raylib"
 try_pick_up_entity :: proc(player: ^Entity) {
     for key in player.entity_ids {
         item := entity_get(key)
-        player.holding.item = item
 		if .Cart in item.flags {
-			player.holding.offset_map = make(map[Direction]Vec2)
-			player.holding.offset_map[.UP] = Vec2{-14, -22}
-			player.holding.offset_map[.DOWN] = Vec2{-12, 22}
-			player.holding.offset_map[.LEFT] = Vec2{-60, 5}
-			player.holding.offset_map[.RIGHT] = Vec2{42, -5}
+			player.holding.item = item
+			if .Cart in item.flags {
+				player.holding.offset_map = make(map[Direction]Vec2)
+				player.holding.offset_map[.UP] = Vec2{-14, -22}
+				player.holding.offset_map[.DOWN] = Vec2{-12, 22}
+				player.holding.offset_map[.LEFT] = Vec2{-60, -5}
+				player.holding.offset_map[.RIGHT] = Vec2{42, -5}
+			}
+			break
 		}
-        break
     }
 }
 
 drop_entity :: proc(player: ^Entity) {
     delete(player.holding.offset_map)
     player.holding.flags -= {.In_Motion}
+	update_animation(player.holding.item)
     player.holding.item = nil
 }
 
@@ -47,6 +50,11 @@ held_item_update :: proc(player: ^Entity) {
     }
     player.holding.combined_collider = player.holding.collider
         player.holding.combined_collider.y += 10
+
+	player.holding.flags -= { .In_Motion }
+	if .In_Motion in player.flags {
+		player.holding.flags += { .In_Motion }
+	}
 }
 
 player_update :: proc(dt: f32) {
@@ -137,16 +145,26 @@ get_direction_animation_name :: proc (entity: ^Entity) -> string {
 }
 
 get_state_animation_name :: proc (entity: ^Entity) -> string {
+	inMotion := .In_Motion in entity.flags
 	switch entity.state {
 		case .STILL:
 			return "idle"
 		case .WALK:
 			return "walk"
 		case .HOLD:
+			if !inMotion {
+				return "push-idle"
+			}
 			return "push"
 		case .EMPTY:
+			if !inMotion {
+				return "empty-idle"
+			}
 			return "empty"
 		case .FULL:
+			if !inMotion {
+				return "empty-idle"
+			}
 			return "full"
 	}
 	return ""

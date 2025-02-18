@@ -136,14 +136,20 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 					x, y := entity.__worldX, entity.__worldY
 					width, height := entity.width, entity.height
 
-					append(&l.entities, Entity{
+					shelf := Entity{
 						position = {x = x, y = y, width = width, height = height},
 						collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
 						combined_collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
 						direction = Direction.RIGHT,
-						flags = {.Shelf, .Debug_Draw},
-						state = .EMPTY
-					})
+						flags = {.Debug_Draw},
+						state = .EMPTY,
+						texture = &store_texture,
+						current_anim_name = "shelf",
+					}
+
+					init_store_animations(&shelf)
+
+					append(&l.entities, shelf)
 				}
 			}
 		case "Walls_Behind":

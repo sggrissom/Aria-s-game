@@ -133,7 +133,7 @@ main :: proc() {
 	rl.InitWindow(i32(gs.window_size.x), i32(gs.window_size.y), "hi ARiA!")
 	rl.SetTargetFPS(60)
 
-	store_texture = rl.LoadTexture("resources/STORE.png")
+	store_texture = rl.LoadTexture("resources/store.png")
 	walls_texture = rl.LoadTexture("resources/WALLS-2.png")
 	floor_texture = rl.LoadTexture("resources/floors.png")
 	cart_texture = rl.LoadTexture("resources/carts.png")
