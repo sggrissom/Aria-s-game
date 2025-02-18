@@ -41,6 +41,7 @@ render_entity :: proc(entity: ^Entity, dt: f32) {
     }
     if .Debug_Draw in entity.flags {
         rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
+        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
     }
 }
 

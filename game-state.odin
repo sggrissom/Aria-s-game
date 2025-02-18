@@ -5,14 +5,11 @@ import rl "vendor:raylib"
 
 gs : Game_State
 
-cart_texture : rl.Texture
-store_texture : rl.Texture
 walls_texture : rl.Texture
 floor_texture : rl.Texture
-player_texture : rl.Texture
-player_walk_texture : rl.Texture
-player_push_texture : rl.Texture
+store_texture : rl.Texture
 blue_char_texture : rl.Texture
+cart_texture : rl.Texture
 
 make_player_animation :: proc(start, end, row: int) -> ^Animation {
     player_anim := new(Animation)
@@ -46,4 +43,29 @@ init_player_animations :: proc()
     
     player := entity_get(gs.player_id)
     player.animations = animations
+}
+
+make_cart_animation :: proc(start, end, row: int) -> ^Animation {
+    player_anim := new(Animation)
+    player_anim.size = {96, 96}
+	player_anim.offset = {24, 24}
+	player_anim.start = start
+	player_anim.end = end
+	player_anim.row = row
+	player_anim.time = 0.5
+	player_anim.flags =  {.Loop}
+    return player_anim
+}
+
+init_cart_animations :: proc(entity : ^Entity)
+{
+	animations := make(map[string]^Animation)
+	animations = {
+        "empty-left" = make_cart_animation(0, 2, 3),
+        "empty-right" = make_cart_animation(0, 2, 0),
+        "empty-up" = make_cart_animation(0, 2, 9),
+        "empty-down" = make_cart_animation(0, 2, 6),
+    }
+    
+    entity.animations = animations
 }

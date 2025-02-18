@@ -11,14 +11,13 @@ import rl "vendor:raylib"
 try_pick_up_entity :: proc(player: ^Entity) {
     for key in player.entity_ids {
         item := entity_get(key)
-        item.flags += {.Removed}
         player.holding.item = item
 		if .Cart in item.flags {
 			player.holding.offset_map = make(map[Direction]Vec2)
-			player.holding.offset_map[.UP] = Vec2{-8, -CART_OFFSET}
-			player.holding.offset_map[.DOWN] = Vec2{-9, CART_OFFSET}
-			player.holding.offset_map[.LEFT] = Vec2{-(CART_OFFSET + 14), 5}
-			player.holding.offset_map[.RIGHT] = Vec2{CART_OFFSET, 5}
+			player.holding.offset_map[.UP] = Vec2{-14, -22}
+			player.holding.offset_map[.DOWN] = Vec2{-12, 22}
+			player.holding.offset_map[.LEFT] = Vec2{-60, 5}
+			player.holding.offset_map[.RIGHT] = Vec2{42, -5}
 		}
         break
     }
@@ -26,7 +25,6 @@ try_pick_up_entity :: proc(player: ^Entity) {
 
 drop_entity :: proc(player: ^Entity) {
     delete(player.holding.offset_map)
-    player.holding.flags -= {.Removed}
     player.holding.flags -= {.In_Motion}
     player.holding.item = nil
 }
@@ -110,11 +108,18 @@ player_update :: proc(dt: f32) {
 
 	gs.cam.target = {player.x - player.width / 2, player.y - player.height / 2}
 
-	stateName := get_state_animation_name(player)
-	directionName := get_direction_animation_name(player)
+	update_animation(player)
+	if isHolding {
+		update_animation(player.holding.item)
+	}
+}
+
+update_animation :: proc (entity: ^Entity) {
+	stateName := get_state_animation_name(entity)
+	directionName := get_direction_animation_name(entity)
 	builder := new(strings.Builder, context.temp_allocator)
 	animationName := fmt.sbprintf(builder, "%s-%s", stateName, directionName)
-	if animationName != player.current_anim_name do switch_animation(player, animationName)
+	if animationName != entity.current_anim_name do switch_animation(entity, animationName)
 }
 
 get_direction_animation_name :: proc (entity: ^Entity) -> string {

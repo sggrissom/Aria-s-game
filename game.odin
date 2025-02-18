@@ -42,7 +42,6 @@ colliderWidth :: 20
 colliderHeight :: 20
 playerHeight :: 48
 playerWidth :: 33
-CART_OFFSET :: 22
 
 Game_State :: struct {
 	window_size:  Vec2,
@@ -137,7 +136,7 @@ main :: proc() {
 	store_texture = rl.LoadTexture("resources/STORE.png")
 	walls_texture = rl.LoadTexture("resources/WALLS-2.png")
 	floor_texture = rl.LoadTexture("resources/floors.png")
-	cart_texture = rl.LoadTexture("resources/CART.png")
+	cart_texture = rl.LoadTexture("resources/carts.png")
 	blue_char_texture = rl.LoadTexture("resources/blue-char.png")
 
 	read_map_ldtk("resources/game.ldtk")

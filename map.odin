@@ -117,7 +117,7 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 					x, y := entity.__worldX, entity.__worldY
 					width, height := entity.width, entity.height
 
-					append(&l.entities, Entity{
+					cart := Entity{
 						position = {x = x, y = y, width = width, height = height},
 						collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
 						combined_collider = {x = (tileWidth - colliderWidth) / 2, y = (tileWidth - colliderWidth) / 2, width = colliderWidth, height = colliderWidth},
@@ -125,9 +125,13 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 						move_speed = 200,
 						flags = {.Cart, .Debug_Draw},
 						state = .EMPTY,
-						texture = &blue_char_texture,
-						current_anim_name = "idle-right",
-					})
+						texture = &cart_texture,
+						current_anim_name = "empty-right",
+					}
+
+					init_cart_animations(&cart)
+
+					append(&l.entities, cart)
 				case "Shelf":
 					x, y := entity.__worldX, entity.__worldY
 					width, height := entity.width, entity.height
