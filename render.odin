@@ -55,6 +55,9 @@ render_background :: proc() {
 }
 
 render_foreground :: proc() {
+    for &tile in gs.store {
+        render_tile(&tile, store_texture)
+    }
     for &tile in gs.walls_fore {
         render_tile(&tile, walls_texture)
     }

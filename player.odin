@@ -16,9 +16,9 @@ try_pick_up_entity :: proc(player: ^Entity) {
 			if .Cart in item.flags {
 				player.holding.offset_map = make(map[Direction]Vec2)
 				player.holding.offset_map[.UP] = Vec2{-14, -22}
-				player.holding.offset_map[.DOWN] = Vec2{-12, 22}
+				player.holding.offset_map[.DOWN] = Vec2{-13, 22}
 				player.holding.offset_map[.LEFT] = Vec2{-60, -5}
-				player.holding.offset_map[.RIGHT] = Vec2{42, -5}
+				player.holding.offset_map[.RIGHT] = Vec2{38, -5}
 			}
 			break
 		}

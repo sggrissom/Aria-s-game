@@ -52,6 +52,7 @@ Game_State :: struct {
 	tiles:     [dynamic]Tile,
 	walls:     [dynamic]Tile,
 	walls_fore:     [dynamic]Tile,
+	store:        [dynamic]Tile,
 	debug_shapes: [dynamic]Debug_Shape,
 	level_defintions:       map[string]Level,
 	level:                  ^Level,
@@ -112,6 +113,7 @@ Level :: struct {
 	tiles:        [dynamic]Tile,
 	walls:        [dynamic]Tile,
 	walls_fore:        [dynamic]Tile,
+	store:        [dynamic]Tile,
 }
 
 Tile :: struct {
