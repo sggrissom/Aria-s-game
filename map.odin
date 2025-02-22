@@ -144,7 +144,9 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 			}
 		case "Store":
 			for auto_tile in layer.autoLayerTiles {
-				append(&l.store, Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath})
+				tile := Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath}
+				append(&l.store, tile)
+				append(&l.colliders, Rect{tile.pos.x, tile.pos.y, tile.src.x, tile.src.y})
 			}
 		case "Collision":
 			x, y: f32

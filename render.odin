@@ -41,7 +41,7 @@ render_entity :: proc(entity: ^Entity, dt: f32) {
     }
     if .Debug_Draw in entity.flags {
         rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
-        //rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
+        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
     }
 }
 
@@ -60,6 +60,9 @@ render_foreground :: proc() {
     }
     for &tile in gs.walls_fore {
         render_tile(&tile, walls_texture)
+    }
+    for &collider in gs.colliders {
+        rl.DrawRectangleLinesEx(collider, 1, rl.BLUE)
     }
 }
 
