@@ -3,7 +3,20 @@ package main
 
 import rl "vendor:raylib"
 
-render_tile :: proc(tile: ^Tile, texture: rl.Texture2D) {
+RenderBlock :: struct {
+    texture: ^rl.Texture2D,
+    source: Rect,
+    position: Vec2,
+    tint: rl.Color
+}
+
+render_blocks ::proc(blocks: []RenderBlock) {
+    for block in blocks {
+        rl.DrawTextureRec(block.texture^, block.source, block.position, block.tint)
+    }
+}
+
+render_tile :: proc(tile: ^Tile, texture: ^rl.Texture2D) -> (block: RenderBlock) {
     width: f32 = tileWidth
     height: f32 = tileWidth
 
@@ -13,16 +26,21 @@ render_tile :: proc(tile: ^Tile, texture: rl.Texture2D) {
         height = -tileWidth
     }
 
-    rl.DrawTextureRec(
+    return {
         texture,
         {tile.src.x, tile.src.y, width, height},
         tile.pos,
         rl.WHITE,
-    )
+    }
 }
 
-render_entity :: proc(entity: ^Entity, dt: f32) {
+render_entity :: proc(entity: ^Entity, dt: f32) -> (block: RenderBlock) {
     if .Removed in entity.flags do return 
+
+    if .Debug_Draw in entity.flags {
+        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
+        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
+    }
 
     if entity.texture != nil {
         entity.animation_timer -= dt
@@ -36,34 +54,15 @@ render_entity :: proc(entity: ^Entity, dt: f32) {
                 animation.size.y,
             }
 
-            rl.DrawTextureRec(entity.texture^, source, {entity.x, entity.y} - animation.offset, rl.WHITE)
+            return {
+                entity.texture,
+                source,
+                ({entity.x, entity.y} - animation.offset),
+                rl.WHITE,
+            }
         }
     }
-    if .Debug_Draw in entity.flags {
-        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
-        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
-    }
-}
-
-render_background :: proc() {
-    for &tile in gs.tiles {
-        render_tile(&tile, floor_texture)
-    }
-    for &wall in gs.walls {
-        render_tile(&wall, walls_texture)
-    }
-}
-
-render_foreground :: proc() {
-    for &tile in gs.store {
-        render_tile(&tile, store_texture)
-    }
-    for &tile in gs.walls_fore {
-        render_tile(&tile, walls_texture)
-    }
-    for &collider in gs.colliders {
-        rl.DrawRectangleLinesEx(collider, 1, rl.BLUE)
-    }
+    return {}
 }
 
 render_frame :: proc() {
@@ -71,31 +70,52 @@ render_frame :: proc() {
     rl.ClearBackground(BG_COLOR)
     rl.BeginMode2D(gs.cam)
 
+    dt := rl.GetFrameTime()
+
     player := entity_get(gs.player_id)
     
-    render_background()
-
-    entities_to_render: []^Entity = make([]^Entity, len(gs.entities), context.temp_allocator)
+    render_count := len(gs.entities) + len(gs.store) + len(gs.walls) + len(gs.walls_fore) + len(gs.tiles)
+    blocks_to_render: []RenderBlock = make([]RenderBlock, render_count, context.temp_allocator)
+    block_index := 0
     for i in 0..<len(gs.entities) {
-        entities_to_render[i] = &gs.entities[i]
+        render_block := render_entity(&gs.entities[i], dt) 
+        if render_block != {} {
+            blocks_to_render[block_index] = render_block 
+            block_index+=1
+        }
+    }
+    for &tile, i in gs.store {
+        blocks_to_render[block_index] = render_tile(&tile, &store_texture)
+        block_index+=1
+    }
+    for &tile, i in gs.walls_fore {
+        blocks_to_render[block_index] = render_tile(&tile, &walls_texture)
+        block_index+=1
+    }
+    for &tile, i in gs.walls{
+        blocks_to_render[block_index] = render_tile(&tile, &walls_texture)
+        block_index+=1
+    }
+    for &tile, i in gs.tiles{
+        blocks_to_render[block_index] = render_tile(&tile, &floor_texture)
+        block_index+=1
+    }
+    for &collider in gs.colliders {
+        rl.DrawRectangleLinesEx(collider, 1, rl.BLUE)
     }
     
     // sort by y
-    for i in 1..<len(entities_to_render) {
-        current := entities_to_render[i]
+    for i in 1..<len(blocks_to_render) {
+        current := blocks_to_render[i]
         j := i - 1
-        for j >= 0 && entities_to_render[j].position.y > current.position.y {
-            entities_to_render[j + 1] = entities_to_render[j]
+        for j >= 0 && blocks_to_render[j].position.y > current.position.y {
+            blocks_to_render[j + 1] = blocks_to_render[j]
             j -= 1
         }
-        entities_to_render[j + 1] = current
+        blocks_to_render[j + 1] = current
     }
     
-    for entity in entities_to_render {
-        render_entity(entity, rl.GetFrameTime())
-    }
-
-    render_foreground()
+    render_blocks(blocks_to_render)
     
     for s in gs.debug_shapes {
 		switch v in s {
