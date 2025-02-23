@@ -4,6 +4,7 @@ package main
 import "core:encoding/json"
 import "core:log"
 import "core:os"
+import "core:slice"
 import "core:strconv"
 import "core:strings"
 import rl "vendor:raylib"
@@ -146,7 +147,7 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 			for auto_tile in layer.autoLayerTiles {
 				tile := Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath}
 				append(&l.store, tile)
-				append(&l.colliders, Rect{tile.pos.x, tile.pos.y, tile.src.x, tile.src.y})
+				//append(&l.colliders, Rect{tile.pos.x, tile.pos.y, tile.src.x, tile.src.y})
 			}
 		case "Collision":
 			x, y: f32
@@ -168,7 +169,54 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 		}
 	}
 
+	consolidate_colliders(&l, level)
+
 	gs.level_defintions[l.iid] = l
+}
+
+consolidate_colliders :: proc(l: ^Level, level: ^LDtk_Level) {
+	wide_rect := l.colliders[0]
+	wide_rects := make([dynamic]Rect, context.temp_allocator)
+
+	for i in 1 ..< len(l.colliders) {
+		rect := l.colliders[i]
+
+		if rect.x == wide_rect.x + wide_rect.width {
+			wide_rect.width += tileWidth
+		} else {
+			append(&wide_rects, wide_rect)
+			wide_rect = rect
+		}
+	}
+
+	clear(&l.colliders)
+	append(&wide_rects, wide_rect)
+
+	slice.sort_by(wide_rects[:], proc(a, b: Rect) -> bool {
+		if a.x != b.x do return a.x < b.x
+		return a.y < b.y
+	})
+
+	big_rect := wide_rects[0]
+
+	for i in 1 ..< len(wide_rects) {
+		rect := wide_rects[i]
+
+		if rect.x == big_rect.x &&
+			big_rect.width == rect.width &&
+			big_rect.y + big_rect.height == rect.y {
+			big_rect.height += tileWidth
+		} else {
+			big_rect.x += level.worldX
+			big_rect.y += level.worldY
+			append(&l.colliders, big_rect)
+			big_rect = rect
+		}
+	}
+
+	big_rect.x += level.worldX
+	big_rect.y += level.worldY
+	append(&l.colliders, big_rect)
 }
 
 level_load :: proc(level: ^Level) {
