@@ -1,12 +1,14 @@
 #+feature dynamic-literals
 package main
 
+import "core:slice"
 import rl "vendor:raylib"
 
 RenderBlock :: struct {
     texture: ^rl.Texture2D,
     source: Rect,
     position: Vec2,
+    depth: f32,
     tint: rl.Color
 }
 
@@ -14,6 +16,11 @@ render_blocks ::proc(blocks: []RenderBlock) {
     for block in blocks {
         rl.DrawTextureRec(block.texture^, block.source, block.position, block.tint)
     }
+}
+
+render_tile_directly :: proc(tile: ^Tile, texture: ^rl.Texture2D) {
+    block := render_tile(tile, texture)
+    rl.DrawTextureRec(block.texture^, block.source, block.position, block.tint)
 }
 
 render_tile :: proc(tile: ^Tile, texture: ^rl.Texture2D) -> (block: RenderBlock) {
@@ -30,6 +37,7 @@ render_tile :: proc(tile: ^Tile, texture: ^rl.Texture2D) -> (block: RenderBlock)
         texture,
         {tile.src.x, tile.src.y, width, height},
         tile.pos,
+        tile.src.y - height,
         rl.WHITE,
     }
 }
@@ -38,8 +46,8 @@ render_entity :: proc(entity: ^Entity, dt: f32) -> (block: RenderBlock) {
     if .Removed in entity.flags do return 
 
     if .Debug_Draw in entity.flags {
-        rl.DrawRectangleLinesEx(entity.position, 1, rl.GREEN)
-        rl.DrawRectangleLinesEx(get_static_collider(entity^), 1, rl.ORANGE)
+        debug_draw_rect(entity.position, 1, rl.GREEN)
+        debug_draw_rect(get_static_collider(entity^), 1, rl.ORANGE)
     }
 
     if entity.texture != nil {
@@ -58,6 +66,7 @@ render_entity :: proc(entity: ^Entity, dt: f32) -> (block: RenderBlock) {
                 entity.texture,
                 source,
                 ({entity.x, entity.y} - animation.offset),
+                entity.y - entity.height,
                 rl.WHITE,
             }
         }
@@ -72,9 +81,16 @@ render_frame :: proc() {
 
     dt := rl.GetFrameTime()
 
+    for &tile, i in gs.tiles{
+        render_tile_directly(&tile, &floor_texture)
+    }
+    for &tile, i in gs.walls{
+        render_tile_directly(&tile, &walls_texture)
+    }
+
     player := entity_get(gs.player_id)
     
-    render_count := len(gs.entities) + len(gs.store) + len(gs.walls) + len(gs.walls_fore) + len(gs.tiles)
+    render_count := len(gs.entities) + len(gs.store)
     blocks_to_render: []RenderBlock = make([]RenderBlock, render_count, context.temp_allocator)
     block_index := 0
     for i in 0..<len(gs.entities) {
@@ -88,34 +104,18 @@ render_frame :: proc() {
         blocks_to_render[block_index] = render_tile(&tile, &store_texture)
         block_index+=1
     }
-    for &tile, i in gs.walls_fore {
-        blocks_to_render[block_index] = render_tile(&tile, &walls_texture)
-        block_index+=1
-    }
-    for &tile, i in gs.walls{
-        blocks_to_render[block_index] = render_tile(&tile, &walls_texture)
-        block_index+=1
-    }
-    for &tile, i in gs.tiles{
-        blocks_to_render[block_index] = render_tile(&tile, &floor_texture)
-        block_index+=1
-    }
     for &collider in gs.colliders {
-        rl.DrawRectangleLinesEx(collider, 1, rl.BLUE)
+        debug_draw_rect(collider, 1, rl.BLUE)
     }
     
-    // sort by y
-    for i in 1..<len(blocks_to_render) {
-        current := blocks_to_render[i]
-        j := i - 1
-        for j >= 0 && blocks_to_render[j].position.y > current.position.y {
-            blocks_to_render[j + 1] = blocks_to_render[j]
-            j -= 1
-        }
-        blocks_to_render[j + 1] = current
-    }
-    
+    slice.sort_by(blocks_to_render[:], proc(a, b: RenderBlock) -> bool {
+        return a.depth < b.depth
+    })
     render_blocks(blocks_to_render)
+
+    for &tile, i in gs.walls_fore{
+        render_tile_directly(&tile, &walls_texture)
+    }
     
     for s in gs.debug_shapes {
 		switch v in s {
