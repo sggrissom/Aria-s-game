@@ -170,9 +170,66 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 	}
 
 	consolidate_colliders(&l, level)
+	make_shelf_colliders(&l, level)
 
 	gs.level_defintions[l.iid] = l
 }
+
+ make_shelf_colliders :: proc(l: ^Level, level: ^LDtk_Level) {
+ 	wide_rect := Rect{ l.store[0].pos.x, l.store[0].pos.y, tileWidth, tileWidth }
+ 	wide_rects := make([dynamic]Rect, context.temp_allocator)
+
+	for i in 1 ..< len(l.store) {
+		rect := Rect{ l.store[i].pos.x, l.store[i].pos.y, tileWidth, tileWidth }
+
+		if rect.x == wide_rect.x + wide_rect.width {
+			wide_rect.width += tileWidth
+		} else {
+			append(&wide_rects, wide_rect)
+			wide_rect = rect
+		}
+	}
+
+	append(&wide_rects, wide_rect)
+
+	slice.sort_by(wide_rects[:], proc(a, b: Rect) -> bool {
+		if a.x != b.x do return a.x < b.x
+		return a.y < b.y
+	})
+
+ 	big_rects := make([dynamic]Rect, context.temp_allocator)
+	big_rect := wide_rects[0]
+
+	for i in 1 ..< len(wide_rects) {
+		rect := wide_rects[i]
+
+		if rect.x == big_rect.x &&
+			big_rect.width == rect.width &&
+			big_rect.y + big_rect.height == rect.y {
+			big_rect.height += tileWidth
+		} else {
+			big_rect.x += level.worldX
+			big_rect.y += level.worldY
+			append(&big_rects, big_rect)
+			big_rect = rect
+		}
+	}
+
+	big_rect.x += level.worldX
+	big_rect.y += level.worldY
+	append(&big_rects, big_rect)
+	
+	for i in 1 ..< len(big_rects) {
+		//add margin
+		rect := big_rects[i]
+		offset : f32 = 30.0
+		rect.height = rect.height - offset
+		rect.width = rect.width - offset
+		rect.x = rect.x + offset/2
+		rect.y = rect.y + offset/2
+		append(&l.colliders, rect)
+	}
+ }
 
 consolidate_colliders :: proc(l: ^Level, level: ^LDtk_Level) {
 	wide_rect := l.colliders[0]

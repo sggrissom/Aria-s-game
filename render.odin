@@ -140,7 +140,7 @@ render_frame :: proc() {
         rl.DrawText(rl.TextFormat("touching id: %02i", int(id)), 10, i32(y_line), 10, rl.WHITE)
         y_line += 20
     }
-    rl.DrawText(rl.TextFormat("animation: %s", player.current_anim_name), 10, i32(y_line), 10, rl.WHITE)
+    rl.DrawText(rl.TextFormat("position: (%f, %f)", player.x, player.y), 10, i32(y_line), 10, rl.WHITE)
     rl.EndDrawing()
 
     clear(&gs.debug_shapes)
