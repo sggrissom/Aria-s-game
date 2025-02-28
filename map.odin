@@ -219,9 +219,9 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 	big_rect.y += level.worldY
 	append(&big_rects, big_rect)
 	
-	for i in 1 ..< len(big_rects) {
+
+	for &rect in big_rects {
 		//add margin
-		rect := big_rects[i]
 		offset : f32 = 30.0
 		rect.height = rect.height - offset
 		rect.width = rect.width - offset
