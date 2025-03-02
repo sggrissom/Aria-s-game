@@ -176,11 +176,22 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 }
 
  make_shelf_colliders :: proc(l: ^Level, level: ^LDtk_Level) {
- 	wide_rect := Rect{ l.store[0].pos.x, l.store[0].pos.y, tileWidth, tileWidth }
+ 	rects := make([dynamic]Rect, context.temp_allocator)
+	for shelf in l.store {
+		rect := Rect{ shelf.pos.x, shelf.pos.y, tileWidth, tileWidth }
+		append(&rects, rect)
+	}
+
+	slice.sort_by(rects[:], proc(a, b: Rect) -> bool {
+		if a.y != b.y do return a.y < b.y
+		return a.x < b.x
+	})
+
+ 	wide_rect := rects[0]
  	wide_rects := make([dynamic]Rect, context.temp_allocator)
 
-	for i in 1 ..< len(l.store) {
-		rect := Rect{ l.store[i].pos.x, l.store[i].pos.y, tileWidth, tileWidth }
+	for i in 1 ..< len(rects) {
+		rect := rects[i] 
 
 		if rect.x == wide_rect.x + wide_rect.width {
 			wide_rect.width += tileWidth
