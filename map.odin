@@ -147,7 +147,6 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 			for auto_tile in layer.autoLayerTiles {
 				tile := Tile{auto_tile.px + l.level_min, auto_tile.src, auto_tile.f, layer.__tilesetRelPath}
 				append(&l.store, tile)
-				//append(&l.colliders, Rect{tile.pos.x, tile.pos.y, tile.src.x, tile.src.y})
 			}
 		case "Collision":
 			x, y: f32
@@ -233,7 +232,7 @@ level_parse_and_store :: proc(gs: ^Game_State, level: ^LDtk_Level) {
 
 	for &rect in big_rects {
 		//add margin
-		offset : f32 = 30.0
+		offset : f32 = 20.0
 		rect.height = rect.height - offset
 		rect.width = rect.width - offset
 		rect.x = rect.x + offset/2

@@ -37,7 +37,7 @@ render_tile :: proc(tile: ^Tile, texture: ^rl.Texture2D) -> (block: RenderBlock)
         texture,
         {tile.src.x, tile.src.y, width, height},
         tile.pos,
-        tile.src.y - height,
+        tile.pos.y - height,
         rl.WHITE,
     }
 }
@@ -97,11 +97,15 @@ render_frame :: proc() {
         render_block := render_entity(&gs.entities[i], dt) 
         if render_block != {} {
             blocks_to_render[block_index] = render_block 
+                block := blocks_to_render[block_index]
+                rl.DrawText(rl.TextFormat("depth: (%f)", block.depth), i32(block.position.x), i32(block.position.y) - 15, 10, rl.BLACK)
             block_index+=1
         }
     }
     for &tile, i in gs.store {
         blocks_to_render[block_index] = render_tile(&tile, &store_texture)
+        block := blocks_to_render[block_index]
+        rl.DrawText(rl.TextFormat("depth: (%f)", block.depth), i32(block.position.x), i32(block.position.y) - 15, 10, rl.BLACK)
         block_index+=1
     }
     for &collider in gs.colliders {
